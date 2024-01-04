@@ -4,6 +4,7 @@ import SupplierWebRoute from "./SupplierRouter.js";
 import DishWebRoute from "./DishRouter.js";
 import GoodsWebRoute from "./GoodsRouter.js";
 import PaymentRouter from "./PaymentRouter.js";
+import BookingRouter from "./BookingsRouter.js";
 
 import OrderRouter from "./OrderRouter.js";
 
@@ -13,7 +14,8 @@ export default (app) => {
     SupplierWebRoute(app);      //Route nha cung cap hang hoa
     DishWebRoute(app);          //Route mon an
     GoodsWebRoute(app);         //Route hang hoa
-    PaymentRouter(app);
+    PaymentRouter(app);         //Route phieu chi
+    BookingRouter(app);         //Route dat ban
 
     OrderRouter(app);
 }

@@ -47,12 +47,12 @@ class DishService {
         }
     }
 
-    async Delete(idCustomer) {
+    async Delete(idDish) {
         try {
-            await connection.execute("DELETE FROM `mon` WHERE idmon = ?", [idCustomer])
-            let result = await new DishService().FindOneById(idCustomer);
+            await connection.execute("DELETE FROM `mon` WHERE idmon = ?", [idDish])
+            let result = await new DishService().FindOneById(idDish);
             if (result.length === 0) {
-                return idCustomer;
+                return idDish;
             }
         } catch (e) {
             console.log(e);
