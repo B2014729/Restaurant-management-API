@@ -53,13 +53,13 @@ const NewSupplier = async (req, res) => {
 }
 
 const UpdateSupplier = async (req, res) => {
-    let idSupplier = req.params.id;
+    let id = req.params.id;
     let updateSupplier = req.body;
     if (!updateSupplier.name || !updateSupplier.address || !updateSupplier.phone || !updateSupplier.bank) {
         return res.status(401).json(FormatResponseJson(401, "Invalid data, please check again!", []));
     }
 
-    if (!idSupplier) {
+    if (!id) {
         return res.status(404).json(FormatResponseJson(404, "Id is not empty!", []));
     } else {
         id = Number(id);
@@ -69,7 +69,7 @@ const UpdateSupplier = async (req, res) => {
     }
 
     try {
-        let result = await SupplierService.Update(idSupplier, updateSupplier);
+        let result = await SupplierService.Update(id, updateSupplier);
         if (!result || result.length === 0) {
             return res.status(401).json(FormatResponseJson(401, "Update supplier failed!", []));
         }

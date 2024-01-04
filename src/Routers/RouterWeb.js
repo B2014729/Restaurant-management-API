@@ -3,10 +3,12 @@ import StaffWebRoute from "./StaffRouter.js";
 import SupplierWebRoute from "./SupplierRouter.js";
 import DishWebRoute from "./DishRouter.js";
 import GoodsWebRoute from "./GoodsRouter.js";
-import PaymentRouter from "./PaymentRouter.js";
-import BookingRouter from "./BookingsRouter.js";
+import PaymentWebRouter from "./PaymentRouter.js";
+import BookingWebRouter from "./BookingsRouter.js";
+import TableWebRoute from "./TableRouter.js";
 
 import OrderRouter from "./OrderRouter.js";
+
 
 export default (app) => {
     StaffWebRoute(app);         //Route nhan vien
@@ -14,8 +16,10 @@ export default (app) => {
     SupplierWebRoute(app);      //Route nha cung cap hang hoa
     DishWebRoute(app);          //Route mon an
     GoodsWebRoute(app);         //Route hang hoa
-    PaymentRouter(app);         //Route phieu chi
-    BookingRouter(app);         //Route dat ban
+    PaymentWebRouter(app);      //Route phieu chi
+    BookingWebRouter(app);      //Route dat ban
+    TableWebRoute(app);         //Route ban
+
 
     OrderRouter(app);
 }
