@@ -37,9 +37,9 @@ class TableService {
             let [tableExist, fieldTable] = await new TableService().FindOneById(idtable);
             if (tableExist) {// tableExist => object is not array????
                 if (tableExist.trangthai === 0) {
-                    await connection.execute("UPDATE `ban` SET `trangthai`= '1'");
+                    await connection.execute("UPDATE `ban` SET `trangthai`= '1' WHERE idban = ?", [idtable]);
                 } else {
-                    await connection.execute("UPDATE `ban` SET `trangthai`= '0'");
+                    await connection.execute("UPDATE `ban` SET `trangthai`= '0'WHERE idban = ?", [idtable]);
                 }
             }
             let [result, field] = await new TableService().FindOneById(idtable);

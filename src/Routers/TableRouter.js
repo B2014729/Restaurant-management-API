@@ -4,7 +4,7 @@ import * as TableController from "../Controllers/TableController.js";
 
 const router = express.Router();
 
-const TableWebRoute = (app) => {
+const TableWebRouter = (app) => {
 
     router.route("/list")
         .get(TableController.GetTableList);
@@ -18,4 +18,4 @@ const TableWebRoute = (app) => {
     return app.use("/api/v1/restaurant-management-system/table", router);
 }
 
-export default TableWebRoute;
+export default TableWebRouter;

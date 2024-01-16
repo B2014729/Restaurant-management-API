@@ -83,7 +83,7 @@ const GetPaymentList = async (req, res) => {
                 nhanvien: resultStaff[0],
                 nhacungcap: resultSupplier[0],
                 ngaygio: payment.ngaygio,
-                thongtinhchitiet: resultDetail
+                thongtinchitiet: resultDetail
             });
         }
 
@@ -96,7 +96,7 @@ const GetPaymentList = async (req, res) => {
 
 const NewPayment = async (req, res) => {
     let paymentNew = req.body;
-    console.log(paymentNew.idStaff, paymentNew.idSupplier, paymentNew.time, paymentNew.idGoods, paymentNew.quantity, paymentNew.price);
+    //console.log(paymentNew.idStaff, paymentNew.idSupplier, paymentNew.time, paymentNew.idGoods, paymentNew.quantity, paymentNew.price);
     if (!paymentNew.idStaff || !paymentNew.idSupplier || !paymentNew.time || !paymentNew.idGoods || !paymentNew.quantity || !paymentNew.price) {
         return res.status(401).json(FormatResponseJson(401, "Invalid data, please check again!", []));
     }

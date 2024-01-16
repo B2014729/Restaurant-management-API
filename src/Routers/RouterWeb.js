@@ -5,7 +5,10 @@ import DishWebRoute from "./DishRouter.js";
 import GoodsWebRoute from "./GoodsRouter.js";
 import PaymentWebRouter from "./PaymentRouter.js";
 import BookingWebRouter from "./BookingsRouter.js";
-import TableWebRoute from "./TableRouter.js";
+import TableWebRouter from "./TableRouter.js";
+import OrderDishWebRouter from "./OrderDishRouter.js";
+import BillWebRouter from "./BillRouter.js";
+
 
 import OrderRouter from "./OrderRouter.js";
 
@@ -18,7 +21,9 @@ export default (app) => {
     GoodsWebRoute(app);         //Route hang hoa
     PaymentWebRouter(app);      //Route phieu chi
     BookingWebRouter(app);      //Route dat ban
-    TableWebRoute(app);         //Route ban
+    TableWebRouter(app);        //Route ban
+    OrderDishWebRouter(app);    //Route dat mon
+    BillWebRouter(app);         //Route hoa don
 
 
     OrderRouter(app);
