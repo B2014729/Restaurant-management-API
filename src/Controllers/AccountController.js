@@ -1,8 +1,30 @@
 import AccountService from "../Services/AccountService.js";
 import FormatResponseJson from "../Services/FotmatResponse.js";
+import * as JWT from "../Services/JWTService.js";
 
 const Login = async (req, res) => {
 
+    const { username, password } = req.body;
+    console.log(username, password);
+    if (!username && !password) {
+        return res.status(400).json(FormatResponseJson(400, "Username and password is not empty!", []));
+    }
+
+    try {
+        const account = await AccountService.Check(username, password);
+
+        if (account.length > 0) {
+            const token = JWT.tokenSign(account[0].idnhanvien);
+            res.setHeader("Authorization", token);
+
+            return res.status(200).json(FormatResponseJson(200, "Login successful!", []));
+        } else {
+            return res.status(401).json(FormatResponseJson(401, "Login failed!", []));
+        }
+    } catch (e) {
+        console.log(e);
+        return res.status(500).json(FormatResponseJson(500, "Internal Server Error!", []));
+    }
 }
 
 const UpdateAcountInfor = async (req, res) => {

@@ -1,3 +1,4 @@
+import AccountRouter from "./AccoutRouter.js";
 import CustomerWebRoute from "./CustomerRouter.js";
 import StaffWebRoute from "./StaffRouter.js";
 import SupplierWebRoute from "./SupplierRouter.js";
@@ -14,6 +15,7 @@ import OrderRouter from "./OrderRouter.js";
 
 
 export default (app) => {
+    AccountRouter(app);         //Route tai khoan
     StaffWebRoute(app);         //Route nhan vien
     CustomerWebRoute(app);      //Route khach hang
     SupplierWebRoute(app);      //Route nha cung cap hang hoa
