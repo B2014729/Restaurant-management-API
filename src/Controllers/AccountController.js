@@ -2,10 +2,25 @@ import AccountService from "../Services/AccountService.js";
 import FormatResponseJson from "../Services/FotmatResponse.js";
 import * as JWT from "../Services/JWTService.js";
 
-const Login = async (req, res) => {
+const test = () => {
+    let a = 101;
+    let x = a.toString()
 
-    const { username, password } = req.body;
-    console.log(username, password);
+    let reverse = '';
+    for (let index = x.length - 1; index >= 0; index--) {
+        reverse += x[index];
+    }
+
+    console.log(typeof x);
+    if (x === reverse) {
+        console.log(true);
+        return
+    }
+    console.log(false);
+}
+
+const Login = async (req, res) => {
+    const { username, password } = req.body
     if (!username && !password) {
         return res.status(400).json(FormatResponseJson(400, "Username and password is not empty!", []));
     }
@@ -55,4 +70,4 @@ const UpdateAcountInfor = async (req, res) => {
     };
 }
 
-export { Login, UpdateAcountInfor };
+export { Login, UpdateAcountInfor, test };

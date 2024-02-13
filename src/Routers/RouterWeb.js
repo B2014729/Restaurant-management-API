@@ -9,10 +9,9 @@ import BookingWebRouter from "./BookingsRouter.js";
 import TableWebRouter from "./TableRouter.js";
 import OrderDishWebRouter from "./OrderDishRouter.js";
 import BillWebRouter from "./BillRouter.js";
-
+import CalendriedWorkStaffRouter from "./CalendriedWorkStaffRouter.js";
 
 import OrderRouter from "./OrderRouter.js";
-
 
 export default (app) => {
     AccountRouter(app);         //Route tai khoan
@@ -26,7 +25,7 @@ export default (app) => {
     TableWebRouter(app);        //Route ban
     OrderDishWebRouter(app);    //Route dat mon
     BillWebRouter(app);         //Route hoa don
-
+    CalendriedWorkStaffRouter(app) //Route lich lam viec cua nhan vien
 
     OrderRouter(app);
 }

@@ -13,7 +13,10 @@ const StaffWebRoute = (app) => {
         .delete(StaffController.DeleteStaff);
     router.route("/create")
         .post(StaffController.NewStaff);
-
+    router.route("/salary/:idPhase")
+        .get(StaffController.SalaryTable);
+    router.route("/salary/:id/calendrier/:idPhase")
+        .get(StaffController.Salary);
     return app.use("/api/v1/restaurant-management-system/staff", router);
 }
 

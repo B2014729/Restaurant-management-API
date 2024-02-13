@@ -25,16 +25,17 @@ const GetBill = async (req, res) => {
         let resultStaff = await StaffService.FindOneById(bill[0].idnhanvien);
 
         let resultDetailOrder = [];
-
+        let payment = 0;
         for (let i = 0; i < billDetail.length; i++) {
             let [order, detailOrder] = await OrderDishService.FindOneById(billDetail[i].iddatmon);
             for (let index = 0; index < detailOrder.length; index++) {
                 let element = detailOrder[index];
                 let dishInfor = await DishService.FindOneById(element.idmon);
 
-
                 delete element.idmon;
                 element.mon = dishInfor[0];
+
+                payment = payment + element.soluong * dishInfor[0].gia;
 
                 resultDetailOrder.push(element);
             }
@@ -44,10 +45,12 @@ const GetBill = async (req, res) => {
             idhoadon: bill[0].idhoadon,
             idban: bill[0].idban,
             nhanvienlap: resultStaff[0],
+            tennhanvien: resultStaff[0].hoten,
             ngaygiotao: bill[0].ngaygiotao,
             ngaygioxuat: bill[0].ngaygioxuat,
             trangthai: bill[0].trangthai,
             chitietdatmon: resultDetailOrder,
+            thanhtoan: payment,
         }];
 
         return res.status(200).json(FormatResponseJson(200, "Successful", resultBillInfo));
@@ -78,7 +81,7 @@ const GetBillWithIdTable = async (req, res) => {// Lay thong tin cua ban dang an
         let resultStaff = await StaffService.FindOneById(bill[0].idnhanvien);
 
         let resultDetailOrder = [];
-
+        let payment = 0;
         for (let i = 0; i < billDetail.length; i++) {
             let [order, detailOrder] = await OrderDishService.FindOneById(billDetail[i].iddatmon);
             for (let index = 0; index < detailOrder.length; index++) {
@@ -88,7 +91,7 @@ const GetBillWithIdTable = async (req, res) => {// Lay thong tin cua ban dang an
 
                 delete element.idmon;
                 element.mon = dishInfor[0];
-
+                payment += dishInfor[0].gia * element.soluong;
                 resultDetailOrder.push(element);
             }
         }
@@ -97,10 +100,12 @@ const GetBillWithIdTable = async (req, res) => {// Lay thong tin cua ban dang an
             idhoadon: bill[0].idhoadon,
             idban: bill[0].idban,
             nhanvienlap: resultStaff[0],
+            tennhanvien: resultStaff[0].hoten,
             ngaygiotao: bill[0].ngaygiotao,
             ngaygioxuat: bill[0].ngaygioxuat,
             trangthai: bill[0].trangthai,
             chitietdatmon: resultDetailOrder,
+            thanhtoan: payment,
         }];
 
         return res.status(200).json(FormatResponseJson(200, "Successful", resultBillInfo));
@@ -129,6 +134,7 @@ const GetBillList = async (req, res) => {
             let resultStaff = await StaffService.FindOneById(bill[0].idnhanvien); // Lay thong tin nhan vien lap hoa don
 
             let resultDetailOrder = [];  // Bien luu thong tin chi tiet dat mon
+            let payment = 0;
 
             for (let i = 0; i < billDetail.length; i++) { //Duyet qua tung dat mon trong chi tiet hoa  don
                 let [order, detailOrder] = await OrderDishService.FindOneById(billDetail[i].iddatmon); // Lay thong tin mon
@@ -138,7 +144,7 @@ const GetBillList = async (req, res) => {
 
                     delete element.idmon;
                     element.mon = dishInfor[0];
-
+                    payment += element.soluong * dishInfor[0].gia;
                     resultDetailOrder.push(element);
                 }
             }
@@ -147,10 +153,13 @@ const GetBillList = async (req, res) => {
                 idhoadon: bill[0].idhoadon,
                 idban: bill[0].idban,
                 nhanvienlap: resultStaff[0],
+                tennhanvien: resultStaff[0].hoten,
                 ngaygiotao: bill[0].ngaygiotao,
                 ngaygioxuat: bill[0].ngaygioxuat,
                 trangthai: bill[0].trangthai,
                 chitietdatmon: resultDetailOrder,
+                giamgia: 0,
+                thanhtoan: payment,
             };
 
             resultBillList.push(resultBillInfo);
@@ -164,6 +173,7 @@ const GetBillList = async (req, res) => {
 
 const GetBillListWhereTime = async (req, res) => {
     let { start, end } = req.params;
+
     if (!start || !end) {
         return res.status(401).json(FormatResponseJson(401, "Invalid data, please check again!", []));
     }
@@ -185,7 +195,7 @@ const GetBillListWhereTime = async (req, res) => {
             let resultStaff = await StaffService.FindOneById(bill[0].idnhanvien); // Lay thong tin nhan vien lap hoa don
 
             let resultDetailOrder = [];  // Bien luu thong tin chi tiet dat mon
-
+            let payment = 0;
             for (let i = 0; i < billDetail.length; i++) { //Duyet qua tung dat mon trong chi tiet hoa  don
                 let [order, detailOrder] = await OrderDishService.FindOneById(billDetail[i].iddatmon); // Lay thong tin mon
                 for (let index = 0; index < detailOrder.length; index++) {
@@ -194,7 +204,7 @@ const GetBillListWhereTime = async (req, res) => {
 
                     delete element.idmon;
                     element.mon = dishInfor[0];
-
+                    payment += dishInfor[0].gia * element.soluong;
                     resultDetailOrder.push(element);
                 }
             }
@@ -203,10 +213,13 @@ const GetBillListWhereTime = async (req, res) => {
                 idhoadon: bill[0].idhoadon,
                 idban: bill[0].idban,
                 nhanvienlap: resultStaff[0],
+                tennhanvien: resultStaff[0].hoten,
                 ngaygiotao: bill[0].ngaygiotao,
                 ngaygioxuat: bill[0].ngaygioxuat,
                 trangthai: bill[0].trangthai,
                 chitietdatmon: resultDetailOrder,
+                giamgia: 0,
+                thanhtoan: payment,
             };
 
             resultBillList.push(resultBillInfo);

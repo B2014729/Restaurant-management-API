@@ -3,6 +3,7 @@ import FormatResponseJson from "../Services/FotmatResponse.js";
 
 const GetSupplier = async (req, res) => {
     let id = req.params.id;
+    console.log(id);
     if (!id) {
         return res.status(404).json(FormatResponseJson(404, "Id is not empty!", []));
     } else {
@@ -36,7 +37,8 @@ const GetSupplierList = async (req, res) => {
 
 const NewSupplier = async (req, res) => {
     let newSupplier = req.body;
-    if (!newSupplier.name || !newSupplier.address || !newSupplier.phone || !newSupplier.bank) {
+
+    if (!newSupplier.name || !newSupplier.address || !newSupplier.phone || !newSupplier.bank || !newSupplier.bankName) {
         return res.status(401).json(FormatResponseJson(401, "Invalid data, please check again!", []));
     }
 
@@ -55,7 +57,7 @@ const NewSupplier = async (req, res) => {
 const UpdateSupplier = async (req, res) => {
     let id = req.params.id;
     let updateSupplier = req.body;
-    if (!updateSupplier.name || !updateSupplier.address || !updateSupplier.phone || !updateSupplier.bank) {
+    if (!updateSupplier.name || !updateSupplier.address || !updateSupplier.phone || !updateSupplier.bank || !updateSupplier.bankName) {
         return res.status(401).json(FormatResponseJson(401, "Invalid data, please check again!", []));
     }
 
@@ -83,6 +85,7 @@ const UpdateSupplier = async (req, res) => {
 
 const DeleteSupplier = async (req, res) => {
     let id = req.params.id;
+
     if (!id) {
         return res.status(404).json(FormatResponseJson(404, "Id is not empty!", []));
     }

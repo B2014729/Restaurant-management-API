@@ -13,7 +13,7 @@ class SupplierService {
 
     async FindAll() {
         try {
-            let [result, field] = await connection.execute("SELECT * FROM nhacungcap");
+            let [result, field] = await connection.execute("SELECT * FROM nhacungcap WHERE trangthai = 1");
             return result;
         } catch (e) {
             console.log(e);
@@ -23,8 +23,8 @@ class SupplierService {
 
     async Create(newSupplier) {
         try {
-            let { name, address, phone, bank } = newSupplier;
-            await connection.execute("INSERT INTO `nhacungcap`(`tennhacungcap`, `diachi`, `sodienthoai`, `sotaikhoan`) VALUES (?,?,?,?)", [name, address, phone, bank])
+            let { name, address, phone, bank, bankName } = newSupplier;
+            await connection.execute("INSERT INTO `nhacungcap`(`tennhacungcap`, `diachi`, `sodienthoai`, `sotaikhoan`, `nganhang`, `trangthai`) VALUES (?,?,?,?,?,1)", [name, address, phone, bank, bankName])
             let [result, field] = await connection.execute("SELECT * FROM nhacungcap ORDER BY idnhacungcap DESC LIMIT 1;");
             return result;
         } catch (e) {
@@ -35,8 +35,8 @@ class SupplierService {
 
     async Update(idSupplier, updateSupplier) {
         try {
-            let { name, address, phone, bank } = updateSupplier;
-            let [update, field] = await connection.execute("UPDATE `nhacungcap` SET `tennhacungcap`= ?,`diachi`= ?,`sodienthoai`= ?,`sotaikhoan`= ? WHERE idnhacungcap = ?", [name, address, phone, bank, idSupplier])
+            let { name, address, phone, bank, bankName } = updateSupplier;
+            let [update, field] = await connection.execute("UPDATE `nhacungcap` SET `tennhacungcap`= ?,`diachi`= ?,`sodienthoai`= ?,`sotaikhoan`= ?, `nganhang` = ? WHERE idnhacungcap = ?", [name, address, phone, bank, bankName, idSupplier])
             if (update.changedRows !== 0) {
                 let [result, field] = await new SupplierService().FindOneById(idSupplier);
                 return result;
@@ -49,9 +49,9 @@ class SupplierService {
 
     async Delete(idSupplier) {
         try {
-            await connection.execute("DELETE FROM `nhacungcap` WHERE idnhacungcap = ?", [idSupplier])
+            await connection.execute("UPDATE `nhacungcap` SET `trangthai` = 0 WHERE idnhacungcap = ?", [idSupplier])
             let result = await new SupplierService().FindOneById(idSupplier);
-            if (result.length === 0) {
+            if (result[0].trangthai == 0) {
                 return idSupplier;
             }
         } catch (e) {

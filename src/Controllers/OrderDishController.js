@@ -97,9 +97,9 @@ const GetOrderDishList = async (req, res) => {
 
 const NewOrderDish = async (req, res) => {
     let orderNew = req.body;
-
     orderNew.idStaff = 3; //TEST
 
+    return res.send('test');
     const now = new Date();
     orderNew.dateTime = `${now.getFullYear()}-${now.getMonth() + 1}-${now.getDate()} ${now.getHours()}:${now.getMinutes()}`;
 
@@ -130,7 +130,6 @@ const NewOrderDish = async (req, res) => {
                     await BillService.AddDetailBill(bill[0].idhoadon, result[0][0].iddatmon);
                 }
             }
-
             return res.status(200).json(FormatResponseJson(200, "Create payment successful!", result));
         }
 

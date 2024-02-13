@@ -35,7 +35,7 @@ class OrderDishService {
     async Create(OrderNew) {
         try {
             let { idStaff, dateTime, idTable, status, idDish, quantity, note } = OrderNew;
-            console.log(idStaff, dateTime, idTable, status, idDish, quantity, note);
+            //console.log(idStaff, dateTime, idTable, status, idDish, quantity, note);
             await connection.execute("INSERT INTO `datmon`(`idnhanvien`, `thoidiemdat`, `idban`, `trangthai`) VALUES (?,?,?,?)", [idStaff, dateTime, idTable, status]);
 
             let [result, field] = await connection.execute("SELECT * FROM datmon ORDER BY iddatmon DESC LIMIT 1;");
