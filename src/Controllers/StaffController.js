@@ -225,7 +225,7 @@ const Salary = async (req, res) => {
     }
 
     try {
-        let weekWork = await CalendrierWorkStaffService.GetCalendriedOfStaff(id, idPhase);
+        let weekWork = await CalendrierWorkStaffService.GetCalendrierOfStaff(id, idPhase);
         if (!weekWork) {
             return res.status(400).json(FormatResponseJson(400, `Not found calendried and phase`, []));
         } else {
@@ -318,9 +318,9 @@ const SalaryTable = async (req, res) => {
     try {
         let staffList = await StaffService.FindAll();
 
-        let calendried = await CalendrierWorkStaffService.GetCalendriedWorkWithPlase(idPhase);
-        if (calendried.length <= 0) {
-            return res.status(400).json(FormatResponseJson(400, `Not found calendried and phase`, []));
+        let calendrier = await CalendrierWorkStaffService.GetCalendrierWorkWithPlase(idPhase);
+        if (!calendrier) {
+            return res.status(400).json(FormatResponseJson(400, `Not found calendrier and phase`, []));
         }
 
         let dataResList = [];
@@ -328,7 +328,7 @@ const SalaryTable = async (req, res) => {
         for (let index = 0; index < staffList.length; index++) {
             const element = staffList[index];
 
-            let weekWork = await CalendrierWorkStaffService.GetCalendriedOfStaff(element.idnhanvien, idPhase);
+            let weekWork = await CalendrierWorkStaffService.GetCalendrierOfStaff(element.idnhanvien, idPhase);
             if (weekWork != undefined && weekWork.length > 0) {
                 let money = 10000;
                 switch (element.idluong) {

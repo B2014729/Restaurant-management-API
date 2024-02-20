@@ -35,8 +35,8 @@ class PaymentService {
 
     async Create(PaymentNew) {
         try {
-            let { idStaff, idSupplier, time, idGoods, quantity, price } = PaymentNew;
-            await connection.execute("INSERT INTO `phieuchi`(`idnhanvien`, `idnhacungcap`, `ngaygio`) VALUES (?,?,?)", [idStaff, idSupplier, time]);
+            let { idStaff, idSupplier, time, status, idGoods, quantity, price } = PaymentNew;
+            await connection.execute("INSERT INTO `phieuchi`(`idnhanvien`, `idnhacungcap`, `ngaygio`,  `trangthai`) VALUES (?,?,?,?)", [idStaff, idSupplier, time, status]);
 
             let [result, field] = await connection.execute("SELECT * FROM phieuchi ORDER BY idphieuchi DESC LIMIT 1;");
 

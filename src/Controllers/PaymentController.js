@@ -2,7 +2,7 @@ import GoodsService from "../Services/GoodsService.js";
 import PaymentService from "../Services/PaymentService.js";
 import StaffService from "../Services/StaffService.js";
 import SupplierService from "../Services/SupplierService.js";
-
+import UnitService from "../Services/UnitService.js";
 import FormatResponseJson from "../Services/FotmatResponse.js";
 
 const GetPayment = async (req, res) => {
@@ -28,12 +28,20 @@ const GetPayment = async (req, res) => {
         let resultSupplier = await SupplierService.FindOneById(payment.idnhacungcap);
         let resultDetail = [];
 
+        let amount = 0;
+
         for (let i = 0; i < paymentDetail.length; i++) {
             let result = await GoodsService.FindOneById(paymentDetail[i].idhanghoa);
+            amount += (paymentDetail[i].soluong * paymentDetail[i].dongia);
+
+            let unit = await UnitService.FindOneById(result[0].iddonvitinh);
+            result[0].donvitinh = unit[0].tendonvi;
+
             resultDetail[i] = {
                 hanghoa: result[0],
                 soluong: paymentDetail[i].soluong,
                 dongia: paymentDetail[i].dongia,
+                giam: 0,
             }
         }
 
@@ -42,7 +50,8 @@ const GetPayment = async (req, res) => {
             nhanvien: resultStaff[0],
             nhacungcap: resultSupplier[0],
             ngaygio: payment.ngaygio,
-            thongtinhchitiet: resultDetail
+            thanhtoan: amount,
+            thongtinchitiet: resultDetail,
         }]
 
         return res.status(200).json(FormatResponseJson(200, "Successful", resultPayment));
@@ -62,6 +71,7 @@ const GetPaymentList = async (req, res) => {
         let resultPaymentList = [];
 
         for (let i = 0; i < paymentList.length; i++) {
+            let amount = 0;
             let payment = paymentList[i][0][0];
             let paymentDetail = paymentList[i][1];
 
@@ -71,10 +81,16 @@ const GetPaymentList = async (req, res) => {
 
             for (let i = 0; i < paymentDetail.length; i++) {
                 let result = await GoodsService.FindOneById(paymentDetail[i].idhanghoa);
+                amount += (paymentDetail[i].soluong * paymentDetail[i].dongia);
+
+                let unit = await UnitService.FindOneById(result[0].iddonvitinh);
+
+                result[0].donvitinh = unit.tendonvi;
                 resultDetail[i] = {
                     hanghoa: result[0],
                     soluong: paymentDetail[i].soluong,
                     dongia: paymentDetail[i].dongia,
+                    giam: 0,
                 }
             }
 
@@ -83,7 +99,8 @@ const GetPaymentList = async (req, res) => {
                 nhanvien: resultStaff[0],
                 nhacungcap: resultSupplier[0],
                 ngaygio: payment.ngaygio,
-                thongtinchitiet: resultDetail
+                thanhtoan: amount,
+                thongtinchitiet: resultDetail,
             });
         }
 
@@ -96,7 +113,7 @@ const GetPaymentList = async (req, res) => {
 
 const NewPayment = async (req, res) => {
     let paymentNew = req.body;
-    //console.log(paymentNew.idStaff, paymentNew.idSupplier, paymentNew.time, paymentNew.idGoods, paymentNew.quantity, paymentNew.price);
+    // console.log(paymentNew.idStaff, paymentNew.idSupplier, paymentNew.time, paymentNew.idGoods, paymentNew.quantity, paymentNew.price);
     if (!paymentNew.idStaff || !paymentNew.idSupplier || !paymentNew.time || !paymentNew.idGoods || !paymentNew.quantity || !paymentNew.price) {
         return res.status(401).json(FormatResponseJson(401, "Invalid data, please check again!", []));
     }

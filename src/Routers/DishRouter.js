@@ -7,12 +7,22 @@ const router = express.Router();
 const DishWebRoute = (app) => {
     router.route("/list")
         .get(DishController.GetDishList);
+    router.route("/list-on-type")
+        .get(DishController.GetDishListOrderByType);
+    router.route("/menu")
+        .get(DishController.GetMenuInfor);
+    router.route("/menu/add")
+        .post(DishController.AddDishOnMenu);
+
     router.route("/:id")
         .get(DishController.GetDish)
         .put(DishController.UpdateDish)
         .delete(DishController.DeleteDish);
     router.route("/create")
         .post(DishController.NewDish);
+
+    router.route("/menu/:id")
+        .delete(DishController.DeleteOutMenu);
 
     return app.use("/api/v1/restaurant-management-system/dish", router);
 }
