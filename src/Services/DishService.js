@@ -13,7 +13,7 @@ class DishService {
 
     async FindOneById(id) {
         try {
-            let [result, field] = await connection.execute("SELECT * FROM mon WHERE idmon = ?", [id]);
+            let [result, field] = await connection.execute("SELECT * FROM mon  LEFT JOIN loai ON mon.idloai  = loai.idloai WHERE idmon = ?", [id]);
             return result;
         } catch (e) {
             console.log(e);
@@ -106,6 +106,36 @@ class DishService {
         try {
             await connection.execute("INSERT INTO `menu`(`idmon`) VALUES (?)", [idDish]);
             let [result, field] = await connection.execute("SELECT * FROM menu ORDER BY idmenu DESC LIMIT 1;");
+            return result;
+        } catch (e) {
+            console.log(e);
+            return [];
+        }
+    }
+
+    async GetDishSellALot() {
+        try {
+            let [result, field] = await connection.execute("SELECT chitietdatmon.idmon, COUNT(chitietdatmon.idmon) soluong FROM `chitietdatmon`  GROUP BY chitietdatmon.idmon ORDER BY `soluong` DESC");
+            return result;
+        } catch (e) {
+            console.log(e);
+            return [];
+        }
+    }
+
+    async GetAllDishType() {
+        try {
+            let [result, field] = await connection.execute("SELECT * FROM `loai`");
+            return result;
+        } catch (e) {
+            console.log(e);
+            return [];
+        }
+    }
+
+    async StatisticalOnDishSell() {
+        try {
+            let [result, field] = await connection.execute("SELECT idmon, COUNT(soluong) soluong FROM `chitietdatmon` GROUP BY idmon;");
             return result;
         } catch (e) {
             console.log(e);

@@ -9,6 +9,10 @@ const DishWebRoute = (app) => {
         .get(DishController.GetDishList);
     router.route("/list-on-type")
         .get(DishController.GetDishListOrderByType);
+    router.route("/list-sell-a-lot")
+        .get(DishController.GetDishSellALot);
+    router.route("/statistical-dish-sell")
+        .get(DishController.GetStatisticalDish);
     router.route("/menu")
         .get(DishController.GetMenuInfor);
     router.route("/menu/add")

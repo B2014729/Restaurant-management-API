@@ -209,6 +209,68 @@ const AddDishOnMenu = async (req, res) => {
     }
 }
 
+const GetDishSellALot = async (req, res) => {
+    try {
+        let resultData = [];
+        let listDish = await DishService.GetDishSellALot();
+        for (let index = 0; index < listDish.length; index++) {
+            const dish = listDish[index];
+            let dishDetail = await DishService.FindOneById(dish.idmon);
+            let type
+            let resultListDishAndType = {
+                mon: dishDetail[0],
+                soluong: dish.soluong,
+            }
+            resultData.push(resultListDishAndType);
+        }
+        return res.status(200).json(FormatResponseJson(200, "Successful", resultData));
+    } catch (e) {
+        console.log(e);
+        return res.status(500).json(FormatResponseJson(500, "Internal Server Error!", []));
+    }
+}
+
+const GetStatisticalDish = async (req, res) => { //Thong ke loai mon ban duoc  => so luong
+    try {
+        let resultData = [];
+
+        let listStatisticalOnTyle = [];
+        let statisticalOnDishSell = await DishService.StatisticalOnDishSell();
+        for (let index = 0; index < statisticalOnDishSell.length; index++) {
+            const element = statisticalOnDishSell[index];
+            let dishDetail = await DishService.FindOneById(element.idmon);
+
+            let data = {
+                idloai: dishDetail[0].idloai,
+                tenloai: dishDetail[0].tenloai,
+                soluong: element.soluong
+            }
+            listStatisticalOnTyle.push(data);
+        }
+
+        let allType = await DishService.GetAllDishType()
+        for (let index = 0; index < allType.length; index++) {
+            const element = allType[index];
+            let quantity = 0;
+            for (let i = 0; i < listStatisticalOnTyle.length; i++) {
+                const item = listStatisticalOnTyle[i];
+                if (element.idloai == item.idloai) {
+                    quantity += item.soluong;
+                }
+            }
+            resultData.push({
+                idloai: element.idloai,
+                tenloai: element.tenloai,
+                soluong: quantity,
+            })
+        }
+        return res.status(200).json(FormatResponseJson(200, "Successful", resultData));
+    } catch (e) {
+        console.log(e);
+        return res.status(500).json(FormatResponseJson(500, "Internal Server Error!", []));
+    }
+}
+
 export {
     GetDish,
     GetDishList,
@@ -218,5 +280,7 @@ export {
     GetDishListOrderByType,
     GetMenuInfor,
     DeleteOutMenu,
-    AddDishOnMenu
+    AddDishOnMenu,
+    GetDishSellALot,
+    GetStatisticalDish,
 }

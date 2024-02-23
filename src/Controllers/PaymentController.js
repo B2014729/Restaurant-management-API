@@ -111,6 +111,39 @@ const GetPaymentList = async (req, res) => {
     }
 }
 
+
+const StatisticalPaymentInMonth = async (req, res) => {
+    try {
+        let paymentList = await PaymentService.FindAll();
+        if (paymentList.length <= 0) {
+            return res.status(400).json(FormatResponseJson(400, `Not found payment list`, []));
+        }
+
+        let resultStatisticalInMonth = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,];
+
+        for (let i = 0; i < paymentList.length; i++) {
+            let amount = 0;
+            let payment = paymentList[i][0][0];
+            let paymentDetail = paymentList[i][1];
+
+            for (let i = 0; i < paymentDetail.length; i++) {
+                amount += (paymentDetail[i].soluong * paymentDetail[i].dongia);
+            }
+
+            for (let index = 0; index < 12; index++) {
+                if ((new Date(payment.ngaygio).getMonth() + 1) == (index + 1)) {
+                    resultStatisticalInMonth[index] += amount;
+                }
+            }
+        }
+
+        return res.status(200).json(FormatResponseJson(200, "Successful", resultStatisticalInMonth));
+    } catch (e) {
+        console.log(e);
+        return res.status(500).json(FormatResponseJson(500, "Internal Server Error!", []));
+    }
+}
+
 const NewPayment = async (req, res) => {
     let paymentNew = req.body;
     // console.log(paymentNew.idStaff, paymentNew.idSupplier, paymentNew.time, paymentNew.idGoods, paymentNew.quantity, paymentNew.price);
@@ -197,5 +230,6 @@ export {
     GetPaymentList,
     NewPayment,
     UpdatePayment,
-    DeletePayment
+    DeletePayment,
+    StatisticalPaymentInMonth
 }

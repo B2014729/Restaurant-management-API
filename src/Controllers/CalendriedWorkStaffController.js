@@ -48,7 +48,7 @@ const GetCalendrierWithPhase = async (req, res) => {
 
     try {
         let calendrier = await CalendrierWorkStaffService.GetCalendrierWorkWithPlase(idPhase);
-        if (calendrier.length <= 0) {
+        if (!calendrier || calendrier.length <= 0) {
             return res.status(400).json(FormatResponseJson(400, `Not found customer id ${idPhase}`, []));
         }
 

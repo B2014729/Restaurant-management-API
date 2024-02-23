@@ -8,8 +8,6 @@ const CustomerWebRoute = (app) => {
 
     router.route("/login")
         .post(AccountController.Login);
-    router.route('/test')
-        .get(AccountController.test);
 
     return app.use("/api/v1/restaurant-management-system/account", router);
 }

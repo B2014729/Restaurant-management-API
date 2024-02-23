@@ -20,7 +20,7 @@ const test = () => {
 }
 
 const Login = async (req, res) => {
-    const { username, password } = req.body
+    const { username, password } = req.body;
     if (!username && !password) {
         return res.status(400).json(FormatResponseJson(400, "Username and password is not empty!", []));
     }

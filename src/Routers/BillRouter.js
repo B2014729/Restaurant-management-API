@@ -6,6 +6,10 @@ const router = express.Router();
 const BillWebRouter = (app) => {
     router.route("/list")
         .get(BillController.GetBillList);
+    router.route("/statistical/:year")
+        .get(BillController.StatisticalBillWithMonth);
+    router.route("/statistical-in-month/:month&:year")
+        .get(BillController.StatisticalBillWithMonthAndYear);
     router.route("/list/:start&:end")
         .get(BillController.GetBillListWhereTime);
     router.route("/:id")
@@ -17,6 +21,7 @@ const BillWebRouter = (app) => {
     //   .delete(PaymentController.DeletePayment);
     router.route("/create")
         .post(BillController.NewBill);
+
 
     return app.use("/api/v1/restaurant-management-system/bill", router);
 }

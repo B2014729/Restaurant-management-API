@@ -58,6 +58,21 @@ class BillService {
         }
     }
 
+    async FindAllWithMonthAndYear(month, year) {
+        try {
+            let result = [];
+            let [resultQuery, field] = await connection.execute("SELECT idhoadon FROM `hoadon` WHERE Month(ngaygioxuat) = ? AND YEAR(ngaygioxuat) = ?", [month, year]);
+            for (let i = 0; i < resultQuery.length; i++) {
+                let resultBill = await new BillService().FindOneById(resultQuery[i].idhoadon);
+                result[i] = resultBill;
+            }
+            return result;
+        } catch (e) {
+            console.log(e);
+            return [];
+        }
+    }
+
     async FindBillPaid() { // lay cac hoa don da thanh toan
         try {
             let result = [];
@@ -72,6 +87,7 @@ class BillService {
             return [];
         }
     }
+
 
     async FindAllWhereTime(start, end) { // Lay cac hoa don trong giai doan start => end
         try {

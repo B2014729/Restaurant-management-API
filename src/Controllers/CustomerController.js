@@ -13,9 +13,14 @@ const GetCustomer = async (req, res) => {
     }
     try {
         let customer = await CustomerService.FindOneById(id);
+        let quantityOrderTable = await CustomerService.GetQuantityOrderTable(id);
+        let detailOrderTable = await CustomerService.GetDetailOrderTable(id);
         if (customer.length <= 0) {
             return res.status(400).json(FormatResponseJson(400, `Not found customer id ${id}`, []));
         }
+        customer[0].datban = quantityOrderTable[0].soluong;
+        customer[0].chitietdatban = detailOrderTable;
+
         return res.status(200).json(FormatResponseJson(200, "Successful", customer));
     } catch (e) {
         console.log(e);
@@ -27,6 +32,11 @@ const GetCustomer = async (req, res) => {
 const GetCustomerList = async (req, res) => {
     try {
         let customerList = await CustomerService.FindAll();
+        for (let index = 0; index < customerList.length; index++) {
+            const element = customerList[index];
+            let quantityOrderTable = await CustomerService.GetQuantityOrderTable(element.idkhachhang);
+            element.datban = quantityOrderTable[0].soluong;
+        }
         return res.status(200).json(FormatResponseJson(200, "Successful", customerList));
     } catch (e) {
         console.log(e);
@@ -106,10 +116,28 @@ const DeleteCustomer = async (req, res) => {
     }
 }
 
+
+const GetEvalues = async (req, res) => {
+    try {
+        let evalueList = await CustomerService.FindAllEvalues();
+        for (let index = 0; index < evalueList.length; index++) {
+            const element = evalueList[index];
+            let customerInfor = await CustomerService.FindOneById(element.idkhachhang);
+            element.tendangnhap = customerInfor[0].tendangnhap;
+
+        }
+        return res.status(200).json(FormatResponseJson(200, "Successful", evalueList));
+    } catch (e) {
+        console.log(e);
+        return res.status(500).json(FormatResponseJson(500, "Internal Server Error!", []));
+    }
+}
+
 export {
     GetCustomer,
     GetCustomerList,
     NewCustomer,
     UpdateCustomer,
-    DeleteCustomer
+    DeleteCustomer,
+    GetEvalues,
 }

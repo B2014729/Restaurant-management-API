@@ -171,6 +171,91 @@ const GetBillList = async (req, res) => {
     }
 }
 
+const StatisticalBillWithMonth = async (req, res) => { //Thong ke hoa don voi tung thang
+    try {
+        let billList = await BillService.FindAll();     //Lay danh sach hoa don
+        if (billList.length <= 0) {
+            return res.status(400).json(FormatResponseJson(400, `Not found bill list`, []));
+        }
+
+        let staticticalInMonth = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];//Bien chua ket qua danh sach hoa don sau khi format
+
+        for (let l = 0; l < billList.length; l++) {     //Duyet qua tung phan tu cua danh sach hoa don
+            let [bill, billDetail] = await BillService.FindOneById(billList[l][0][0].idhoadon);// Lay thong tin cua hoa don
+            if (bill.length <= 0) {
+                return res.status(400).json(FormatResponseJson(400, `Not found bill id ${billList[l].idhoadon}`, []));
+            }
+            let payment = 0;
+
+            for (let i = 0; i < billDetail.length; i++) { //Duyet qua tung dat mon trong chi tiet hoa  don
+                let [order, detailOrder] = await OrderDishService.FindOneById(billDetail[i].iddatmon); // Lay thong tin mon
+                for (let index = 0; index < detailOrder.length; index++) {
+                    let element = detailOrder[index];
+                    let dishInfor = await DishService.FindOneById(element.idmon);
+
+                    payment += element.soluong * dishInfor[0].gia;
+                }
+            }
+
+            for (let index = 0; index < 12; index++) {
+                if ((new Date(bill[0].ngaygioxuat).getMonth() + 1) == (index + 1)) {
+                    staticticalInMonth[index] += payment;
+                }
+            }
+        }
+
+        return res.status(200).json(FormatResponseJson(200, "Successful", staticticalInMonth));
+    } catch (e) {
+        console.log(e);
+        return res.status(500).json(FormatResponseJson(500, "Internal Server Error!", []));
+    }
+}
+
+const StatisticalBillWithMonthAndYear = async (req, res) => { //Thong ke hoa don theo ngay voi thang va nam
+    let { month, year } = req.params;
+
+    try {
+        let billList = await BillService.FindAllWithMonthAndYear(month, year);     //Lay danh sach hoa don
+        if (billList.length <= 0) {
+            return res.status(400).json(FormatResponseJson(400, `Not found bill list`, []));
+        }
+
+        let staticticalInDay = [];//Bien chua ket qua danh sach hoa don sau khi format
+        for (let index = 0; index < 31; index++) {
+            staticticalInDay[index] = 0;
+        }
+
+        for (let l = 0; l < billList.length; l++) {     //Duyet qua tung phan tu cua danh sach hoa don
+            let [bill, billDetail] = await BillService.FindOneById(billList[l][0][0].idhoadon);// Lay thong tin cua hoa don
+            if (bill.length <= 0) {
+                return res.status(400).json(FormatResponseJson(400, `Not found bill id ${billList[l].idhoadon}`, []));
+            }
+            let payment = 0;
+
+            for (let i = 0; i < billDetail.length; i++) { //Duyet qua tung dat mon trong chi tiet hoa  don
+                let [order, detailOrder] = await OrderDishService.FindOneById(billDetail[i].iddatmon); // Lay thong tin mon
+                for (let index = 0; index < detailOrder.length; index++) {
+                    let element = detailOrder[index];
+                    let dishInfor = await DishService.FindOneById(element.idmon);
+
+                    payment += element.soluong * dishInfor[0].gia;
+                }
+            }
+            for (let index = 0; index < 31; index++) {
+                if ((new Date(bill[0].ngaygioxuat).getDate()) == (index + 1)) {
+                    staticticalInDay[index] += payment;
+                }
+            }
+        }
+
+        return res.status(200).json(FormatResponseJson(200, "Successful", staticticalInDay));
+    } catch (e) {
+        console.log(e);
+        return res.status(500).json(FormatResponseJson(500, "Internal Server Error!", []));
+    }
+}
+
+
 const GetBillListWhereTime = async (req, res) => {
     let { start, end } = req.params;
 
@@ -319,5 +404,7 @@ export {
     GetBillListWhereTime,
     NewBill,
     UpdateStatusBill,
-    //DeletePayment
+    //DeletePayment,
+    StatisticalBillWithMonth,
+    StatisticalBillWithMonthAndYear
 }

@@ -59,6 +59,51 @@ class CustomerService {
             return 0;
         }
     }
+
+    async GetQuantityOrderTable(idCustomer) {
+        try {
+            let [result, field] = await connection.execute("SELECT COUNT(idkhachhang) soluong, idkhachhang FROM `datban` WHERE idkhachhang = ?", [idCustomer]);
+            if (result.length > 0) {
+                return result;
+            }
+            return [{
+                idkhachhang: idCustomer,
+                soluong: 0
+            }];
+        } catch (error) {
+            console.log(error);
+            return [{
+                idkhachhang: idCustomer,
+                soluong: 0
+            }];
+        }
+    }
+
+    async GetDetailOrderTable(idCustomer) {
+        try {
+            let [result, field] = await connection.execute("SELECT * FROM `datban` WHERE idkhachhang = ?", [idCustomer]);
+            if (result.length > 0) {
+                return result;
+            }
+            return [];
+        } catch (error) {
+            console.log(error);
+            return [];
+        }
+    }
+
+    async FindAllEvalues() {
+        try {
+            let [result, field] = await connection.execute("SELECT * FROM danhgia ORDER BY `danhgia`.`thoigian` DESC");
+            if (result.length > 0) {
+                return result;
+            }
+            return [];
+        } catch (error) {
+            console.log(error);
+            return [];
+        }
+    }
 }
 
 export default new CustomerService();

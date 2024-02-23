@@ -6,6 +6,8 @@ const router = express.Router();
 const PaymentWebRouter = (app) => {
     router.route("/list")
         .get(PaymentController.GetPaymentList);
+    router.route("/statistical/:year")
+        .get(PaymentController.StatisticalPaymentInMonth);
     router.route("/:id")
         .get(PaymentController.GetPayment)
         .put(PaymentController.UpdatePayment)

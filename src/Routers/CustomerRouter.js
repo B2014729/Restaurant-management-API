@@ -7,6 +7,8 @@ const router = express.Router();
 const CustomerWebRoute = (app) => {
     router.route("/list")
         .get(CustomerController.GetCustomerList);
+    router.route("/evalues")
+        .get(CustomerController.GetEvalues);
     router.route("/:id")
         .get(CustomerController.GetCustomer)
         .put(CustomerController.UpdateCustomer)
