@@ -32,17 +32,46 @@ class OrderDishService {
         }
     }
 
+    async FindAllDishPaidInDate(date) {
+        let dateFormat = `${date.getFullYear()}-${date.getMonth() + 1}-${date.getDate()} 00:00:00`;
+        try {
+            let [resultQuery, field] = await connection.execute("SELECT * FROM chitietdatmon WHERE tramon >= ? AND trangthai = 1", [dateFormat]);
+            if (resultQuery.length > 0) {
+                return resultQuery;
+            }
+            return [];
+        } catch (e) {
+            console.log(e);
+            return [];
+        }
+    }
+
+    async FindAllInDateAndNoSendKitchen(date) {
+        let dateFormat = `${date.getFullYear()}-${date.getMonth() + 1}-${date.getDate()} 00:00:00`;
+
+        try {
+            let [resultQuery, field] = await connection.execute("SELECT * FROM datmon WHERE thoidiemdat >= ? AND trangthaiguibep = ?", [dateFormat, 0]);
+            if (resultQuery.length > 0) {
+                return resultQuery;
+            }
+            return [];
+        } catch (e) {
+            console.log(e);
+            return [];
+        }
+    }
+
     async Create(OrderNew) {
         try {
             let { idStaff, dateTime, idTable, status, idDish, quantity, note } = OrderNew;
             //console.log(idStaff, dateTime, idTable, status, idDish, quantity, note);
-            await connection.execute("INSERT INTO `datmon`(`idnhanvien`, `thoidiemdat`, `idban`, `trangthai`) VALUES (?,?,?,?)", [idStaff, dateTime, idTable, status]);
+            await connection.execute("INSERT INTO `datmon`(`idnhanvien`, `thoidiemdat`, `idban`, `trangthai`, `trangthaiguibep`) VALUES (?,?,?,?,0)", [idStaff, dateTime, idTable, status]);
 
             let [result, field] = await connection.execute("SELECT * FROM datmon ORDER BY iddatmon DESC LIMIT 1;");
 
             for (let i = 0; i < idDish.length; i++) {
                 let noteDishOrder = note[i] ? note[i] : null;
-                await connection.execute("INSERT INTO `chitietdatmon`(`iddatmon`, `idmon`, `trangthai`, `soluong`, `ghichu`) VALUES (?,?,0,?,?)", [result[0].iddatmon, idDish[i], quantity[i], noteDishOrder]);
+                await connection.execute("INSERT INTO `chitietdatmon`(`iddatmon`, `idmon`, `trangthai`, `soluong`, `ghichu`,`idnhanvien`) VALUES (?,?,0,?,?,1)", [result[0].iddatmon, idDish[i], quantity[i], noteDishOrder]);
             }
 
             let order = await new OrderDishService().FindOneById(result[0].iddatmon);
@@ -74,12 +103,11 @@ class OrderDishService {
     //     }
     // }
 
-    async UpdateStatusDish(idOrder, idDish) {
+    async UpdateStatusDish(idOrder, idDish, dateTime, idStaff) {// Cap nhat trang thai tra mon
         try {
-            console.log(idOrder, idDish);
-            await connection.execute("UPDATE chitietdatmon SET trangthai = 1 WHERE iddatmon = ? AND idmon = ?;", [idOrder, idDish]);
-            let result = await new OrderDishService().FindOneById(idOrder);
-            console.log(result);
+            await connection.execute("UPDATE chitietdatmon SET trangthai = 1, tramon = ?, idnhanvien = ? WHERE iddatmon = ? AND idmon = ?;", [dateTime, idStaff, idOrder, idDish]);
+            let [result, resultDetail] = await new OrderDishService().FindOneById(idOrder);
+
             if (!result) {
                 return [];
             }
@@ -89,6 +117,21 @@ class OrderDishService {
             return [];
         }
     }
+
+    async UpdateStatusSendToKitchen(idOrder) {
+        try {
+            await connection.execute("UPDATE datmon SET trangthaiguibep = 1 WHERE  iddatmon = ?;", [idOrder]);
+            let [result, resultDetail] = await new OrderDishService().FindOneById(idOrder);
+            if (!result) {
+                return [];
+            }
+            return result;
+        } catch (e) {
+            console.log(e);
+            return [];
+        }
+    }
+
 
     async Delete(idOrder) {
         try {

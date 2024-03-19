@@ -7,6 +7,8 @@ const router = express.Router();
 const StaffWebRoute = (app) => {
     router.route("/list")
         .get(StaffController.GetStaffList);
+    router.route("/token")
+        .post(StaffController.GetStaffWithToken);
     router.route("/:id")
         .get(StaffController.GetStaff)
         .put(StaffController.UpdateStaff)

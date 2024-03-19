@@ -60,6 +60,62 @@ const GetBill = async (req, res) => {
     }
 }
 
+const GetBillEating = async (req, res) => {
+    try {
+        let listBill = await BillService.FindAllBillUnpaid();
+
+        if (listBill.length === 0) {
+            return res.status(400).json(FormatResponseJson(400, `Not list bill no payment`, []));
+        }
+
+        let resultBillList = [];
+        for (let i = 0; i < listBill.length; i++) {
+            const billItem = listBill[i];
+            let [bill, billDetail] = await BillService.FindOneById(billItem.idhoadon);
+            if (bill.length <= 0) {
+                return res.status(400).json(FormatResponseJson(400, `Not found payment id ${id}`, []));
+            }
+
+            let resultStaff = await StaffService.FindOneById(bill[0].idnhanvien);
+
+            let resultDetailOrder = [];
+            let payment = 0;
+            for (let i = 0; i < billDetail.length; i++) {
+                let [order, detailOrder] = await OrderDishService.FindOneById(billDetail[i].iddatmon);
+                for (let index = 0; index < detailOrder.length; index++) {
+                    let element = detailOrder[index];
+                    let dishInfor = await DishService.FindOneById(element.idmon);
+
+
+                    delete element.idmon;
+                    element.mon = dishInfor[0];
+                    payment += dishInfor[0].gia * element.soluong;
+                    resultDetailOrder.push(element);
+                }
+            }
+
+            let resultBillInfo = {
+                idhoadon: bill[0].idhoadon,
+                idban: bill[0].idban,
+                nhanvienlap: resultStaff[0],
+                tennhanvien: resultStaff[0].hoten,
+                ngaygiotao: bill[0].ngaygiotao,
+                ngaygioxuat: bill[0].ngaygioxuat,
+                trangthai: bill[0].trangthai,
+                chitietdatmon: resultDetailOrder,
+                thanhtoan: payment,
+            };
+
+            resultBillList.push(resultBillInfo);
+        }
+
+        return res.status(200).json(FormatResponseJson(200, "Successful", resultBillList));
+    } catch (e) {
+        console.log(e);
+        return res.status(500).json(FormatResponseJson(500, "Internal Server Error", []));
+    }
+}
+
 
 const GetBillWithIdTable = async (req, res) => {// Lay thong tin cua ban dang an (=> chua thanh toan)
     let id = req.params.idtable;
@@ -73,6 +129,11 @@ const GetBillWithIdTable = async (req, res) => {// Lay thong tin cua ban dang an
     }
     try {
         let billWithIdTable = await BillService.FindOneByIdTableNew(id);
+
+        if (billWithIdTable.length === 0) {
+            return res.status(400).json(FormatResponseJson(400, `Not found payment id ${id}`, []));
+        }
+
         let [bill, billDetail] = await BillService.FindOneById(billWithIdTable[0].idhoadon);
         if (bill.length <= 0) {
             return res.status(400).json(FormatResponseJson(400, `Not found payment id ${id}`, []));
@@ -171,7 +232,7 @@ const GetBillList = async (req, res) => {
     }
 }
 
-const StatisticalBillWithMonth = async (req, res) => { //Thong ke hoa don voi tung thang
+const StatisticalBillWithMonth = async (req, res) => {  //Thong ke hoa don voi tung thang
     try {
         let billList = await BillService.FindAll();     //Lay danh sach hoa don
         if (billList.length <= 0) {
@@ -258,7 +319,6 @@ const StatisticalBillWithMonthAndYear = async (req, res) => { //Thong ke hoa don
 
 const GetBillListWhereTime = async (req, res) => {
     let { start, end } = req.params;
-
     if (!start || !end) {
         return res.status(401).json(FormatResponseJson(401, "Invalid data, please check again!", []));
     }
@@ -316,6 +376,65 @@ const GetBillListWhereTime = async (req, res) => {
     }
 }
 
+const GetListBillInDate = async (req, res) => {
+    let { date } = req.params;
+    date = new Date(date);
+    if (!date) {
+        return res.status(401).json(FormatResponseJson(401, "Invalid data, please check again!", []));
+    }
+
+    try {
+        let billList = await BillService.FindAllInDate(date);     //Lay danh sach hoa don trong ngay
+        if (billList.length <= 0) {
+            return res.status(400).json(FormatResponseJson(400, `Not found bill list`, []));
+        }
+
+        let resultBillList = [];                       //Bien chua ket qua danh sach hoa don sau khi format
+
+        for (let l = 0; l < billList.length; l++) {     //Duyet qua tung phan tu cua danh sach hoa don
+            let [bill, billDetail] = await BillService.FindOneById(billList[l][0][0].idhoadon);// Lay thong tin cua hoa don
+            if (bill.length <= 0) {
+                return res.status(400).json(FormatResponseJson(400, `Not found bill id ${billList[l].idhoadon}`, []));
+            }
+
+            let resultStaff = await StaffService.FindOneById(bill[0].idnhanvien); // Lay thong tin nhan vien lap hoa don
+
+            let resultDetailOrder = [];  // Bien luu thong tin chi tiet dat mon
+            let payment = 0;
+            for (let i = 0; i < billDetail.length; i++) { //Duyet qua tung dat mon trong chi tiet hoa  don
+                let [order, detailOrder] = await OrderDishService.FindOneById(billDetail[i].iddatmon); // Lay thong tin mon
+                for (let index = 0; index < detailOrder.length; index++) {
+                    let element = detailOrder[index];
+                    let dishInfor = await DishService.FindOneById(element.idmon);
+
+                    delete element.idmon;
+                    element.mon = dishInfor[0];
+                    payment += dishInfor[0].gia * element.soluong;
+                    resultDetailOrder.push(element);
+                }
+            }
+
+            let resultBillInfo = {
+                idhoadon: bill[0].idhoadon,
+                idban: bill[0].idban,
+                nhanvienlap: resultStaff[0],
+                tennhanvien: resultStaff[0].hoten,
+                ngaygiotao: bill[0].ngaygiotao,
+                ngaygioxuat: bill[0].ngaygioxuat,
+                trangthai: bill[0].trangthai,
+                chitietdatmon: resultDetailOrder,
+                giamgia: 0,
+                thanhtoan: payment,
+            };
+
+            resultBillList.push(resultBillInfo);
+        }
+        return res.status(200).json(FormatResponseJson(200, "Successful", resultBillList));
+    } catch (e) {
+        console.log(e);
+        return res.status(500).json(FormatResponseJson(500, "Internal Server Error!", []));
+    }
+}
 
 
 const NewBill = async (req, res) => {
@@ -339,11 +458,11 @@ const NewBill = async (req, res) => {
 
 const UpdateStatusBill = async (req, res) => { // Khi xuat hoa don thanh toan theo id ban
     let idTable = req.params.idtable;
-    let { timePrint, idStaff } = req.body;
-
-    if (!timePrint) {
-        return res.status(401).json(FormatResponseJson(401, "Invalid data, please check again!", []));
-    }
+    let { idStaff } = req.body;
+    let timePrint = new Date();
+    // if (!timePrint) {
+    //     return res.status(401).json(FormatResponseJson(401, "Invalid data, please check again!", []));
+    // }
 
     if (!idTable) {
         return res.status(404).json(FormatResponseJson(404, "Id is not empty!", []));
@@ -398,13 +517,15 @@ const UpdateStatusBill = async (req, res) => { // Khi xuat hoa don thanh toan th
 // }
 
 export {
-    GetBill,
-    GetBillWithIdTable,
-    GetBillList,
-    GetBillListWhereTime,
-    NewBill,
-    UpdateStatusBill,
+    GetBill,                //Lay thong tin hoa don voi idhoadon
+    GetBillWithIdTable,     //Lay thong tin hoa don voi idban
+    GetBillEating,          //Lay thong tin hoa don ban dang an => trang thai hoa don = 0 (chua thanh toan)
+    GetBillList,            //Lay tat ca cac hoa don
+    GetBillListWhereTime,   //Lay danh sach hoa don voi tung giai doan
+    GetListBillInDate,      //Lay danh sach hoa don trong 1 ngay
+    NewBill,                //Tao hoa don moi
+    UpdateStatusBill,       //Cap nhat trang thai thai thanh toan hoa don
     //DeletePayment,
-    StatisticalBillWithMonth,
-    StatisticalBillWithMonthAndYear
+    StatisticalBillWithMonth,   //Thong ke hoa don theo thang
+    StatisticalBillWithMonthAndYear //Thong ke hoa don theo thang va trong 1 nam
 }

@@ -5,6 +5,7 @@ import OrderDishService from "../Services/OrderDishService.js";
 import FormatResponseJson from "../Services/FotmatResponse.js";
 import BillService from "../Services/BillService.js";
 import TableService from "../Services/TableService.js";
+import * as JWT from "../Services/JWTService.js";
 
 const GetOrderDish = async (req, res) => {
     let id = req.params.id;
@@ -34,6 +35,7 @@ const GetOrderDish = async (req, res) => {
                 mon: result[0],
                 soluong: orderDishDetail[i].soluong,
                 trangthai: orderDishDetail[i].trangthai,
+                ghichu: orderDishDetail[i].ghichu,
             }
         }
 
@@ -43,7 +45,8 @@ const GetOrderDish = async (req, res) => {
             trangthai: orderDish.trangthai,
             nhanvien: resultStaff[0],
             thoidiemdat: orderDish.thoidiemdat,
-            thongtinhchitiet: resultDetail
+            trangthaiguibep: orderDish.trangthaiguibep,
+            thongtinchitiet: resultDetail
         }]
 
         return res.status(200).json(FormatResponseJson(200, "Successful", resultOrderDish));
@@ -75,6 +78,7 @@ const GetOrderDishList = async (req, res) => {
                     mon: result[0],
                     soluong: orderDishDetail[i].soluong,
                     trangthai: orderDishDetail[i].trangthai,
+                    ghichu: orderDishDetail[i].ghichu,
                 }
             }
 
@@ -84,7 +88,8 @@ const GetOrderDishList = async (req, res) => {
                 trangthai: orderDish.trangthai,
                 nhanvien: resultStaff[0],
                 thoidiemdat: orderDish.thoidiemdat,
-                thongtinchitiet: resultDetail
+                trangthaiguibep: orderDish.trangthaiguibep,
+                thongtinchitiet: resultDetail,
             });
         }
 
@@ -99,7 +104,6 @@ const NewOrderDish = async (req, res) => {
     let orderNew = req.body;
     orderNew.idStaff = 3; //TEST
 
-    return res.send('test');
     const now = new Date();
     orderNew.dateTime = `${now.getFullYear()}-${now.getMonth() + 1}-${now.getDate()} ${now.getHours()}:${now.getMinutes()}`;
 
@@ -122,7 +126,7 @@ const NewOrderDish = async (req, res) => {
                 };
                 let resultBill = await BillService.Create(billInfo); // Tao hoa don cho ban moi
                 await BillService.AddDetailBill(resultBill[0].idhoadon, result[0][0].iddatmon);
-                await TableService.Update(orderNew.idTable);// Cap nhat trang thai ban co  khach (trangthai = 1)
+                await TableService.Update(orderNew.idTable);// Cap nhat trang thai ban co khach (trangthai = 1)
 
             } else {  // Trang thai them mon
                 let bill = await BillService.FindOneByIdTableNew(orderNew.idTable);
@@ -130,6 +134,9 @@ const NewOrderDish = async (req, res) => {
                     await BillService.AddDetailBill(bill[0].idhoadon, result[0][0].iddatmon);
                 }
             }
+
+            req.io.emit('newOrder');
+
             return res.status(200).json(FormatResponseJson(200, "Create payment successful!", result));
         }
 
@@ -172,11 +179,45 @@ const NewOrderDish = async (req, res) => {
 //         return res.status(500).json(FormatResponseJson(500, "Internal Server Error!", []));
 //     }
 // }
+const GetListDishPaidInDate = async (req, res) => {
+    let date = req.params.date;
+    date = new Date(date);
+    try {
+        let dishList = await OrderDishService.FindAllDishPaidInDate(date);
+        if (dishList.length <= 0) {
+            return res.status(400).json(FormatResponseJson(400, `Not found order dish list`, []));
+        }
 
-const PayDish = async (req, res) => {  //Tra mon => Cap nhat trang thai mon da tra
+        let resultDishList = [];
+
+        for (let i = 0; i < dishList.length; i++) {
+            let element = dishList[i];
+
+            let dishInforDetail = await DishService.FindOneById(element.idmon);
+
+            resultDishList.push({
+                iddatmon: element.iddatmon,
+                trangthai: element.trangthai,
+                thoigiantra: element.tramon,
+                soluong: element.soluong,
+                mon: dishInforDetail[0],
+                idnhanvien: element.idnhanvien,
+                ghichu: element.ghichu,
+            });
+        }
+
+        return res.status(200).json(FormatResponseJson(200, "Successful", resultDishList));
+    } catch (e) {
+        console.log(e);
+        return res.status(500).json(FormatResponseJson(500, "Internal Server Error!", []));
+    }
+}
+
+const UpdateDishPaid = async (req, res) => {  //Tra mon => Cap nhat trang thai mon da tra mon tu bep
     let idOrder = req.params.id;
-    let { idDish } = req.body;
-    if (!idOrder || !idDish) {
+    let { idDish, token } = req.body;
+
+    if (!idOrder || !idDish || !token) {
         return res.status(401).json(FormatResponseJson(401, "Invalid data, please check again!", []));
     }
     if (!idOrder) {
@@ -188,8 +229,12 @@ const PayDish = async (req, res) => {  //Tra mon => Cap nhat trang thai mon da t
         }
     }
 
+    let idStaff = JWT.getUserIdFromToken(token);
+    let timePaid = new Date();
+    console.log(idStaff);
+
     try {
-        let result = await OrderDishService.UpdateStatusDish(idOrder, idDish);
+        let result = await OrderDishService.UpdateStatusDish(idOrder, idDish, timePaid, idStaff);
         if (!result || result.length === 0) {
             return res.status(401).json(FormatResponseJson(401, "Update payment failed!", []));
         }
@@ -200,11 +245,15 @@ const PayDish = async (req, res) => {  //Tra mon => Cap nhat trang thai mon da t
     }
 }
 
-
 const DeleteOrderDish = async (req, res) => {
     let id = req.params.id;
     if (!id) {
         return res.status(404).json(FormatResponseJson(404, "Id is not empty!", []));
+    } else {
+        id = Number(id);
+        if (isNaN(id)) {
+            return res.status(404).json(FormatResponseJson(404, "Id is not Number", []));
+        }
     }
 
     try {
@@ -226,11 +275,79 @@ const DeleteOrderDish = async (req, res) => {
     }
 }
 
+const SendOrderToKitchen = async (req, res) => {
+    let id = req.params.id;
+    if (!id) {
+        return res.status(404).json(FormatResponseJson(404, "Id is not empty!", []));
+    } else {
+        id = Number(id);
+        if (isNaN(id)) {
+            return res.status(404).json(FormatResponseJson(404, "Id is not Number", []));
+        }
+    }
+
+    try {
+        let result = await OrderDishService.UpdateStatusSendToKitchen(id);
+        if (!result || result.length === 0) {
+            return res.status(401).json(FormatResponseJson(401, "Update payment failed!", []));
+        }
+
+        req.io.emit('sendToKitchen');
+
+        return res.status(200).json(FormatResponseJson(200, "Updated payment successful!", [result]));
+    } catch (error) {
+        console.log(error);
+        return res.status(500).json(FormatResponseJson(500, "Internal Server Error!", []));
+    }
+}
+
+const GetListOrderInDateAndNoSendToKitchen = async (req, res) => {//Lay danh sach order chua duoc gui cho bep trong 1 ngay
+    let { date } = req.params;
+    date = new Date(date);
+    if (!date) {
+        return res.status(401).json(FormatResponseJson(401, "Invalid data, please check again!", []));
+    }
+
+    try {
+        let orderDishList = await OrderDishService.FindAllInDateAndNoSendKitchen(date);
+        if (orderDishList.length <= 0) {
+            return res.status(400).json(FormatResponseJson(400, `Not found order dish list`, []));
+        }
+
+        let resultOrderDishList = [];
+
+        for (let i = 0; i < orderDishList.length; i++) {
+            let element = orderDishList[i];
+
+            let resultStaff = await StaffService.FindOneById(element.idnhanvien);
+
+            resultOrderDishList.push({
+                iddatmon: element.iddatmon,
+                idban: element.idban,
+                trangthai: element.trangthai,
+                nhanvien: resultStaff[0],
+                thoidiemdat: element.thoidiemdat,
+                trangthaiguibep: element.trangthaiguibep,
+            });
+        }
+
+        return res.status(200).json(FormatResponseJson(200, "Successful", resultOrderDishList));
+    } catch (e) {
+        console.log(e);
+        return res.status(500).json(FormatResponseJson(500, "Internal Server Error!", []));
+    }
+
+}
+
 export {
     GetOrderDish,
     GetOrderDishList,
     NewOrderDish,
     // UpdatePayment,
-    PayDish,
-    DeleteOrderDish
+    UpdateDishPaid,
+    GetListDishPaidInDate,
+    DeleteOrderDish,
+    SendOrderToKitchen,
+    GetListOrderInDateAndNoSendToKitchen,
+
 }

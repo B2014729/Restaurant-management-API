@@ -4,6 +4,7 @@ import StaffService from "../Services/StaffService.js";
 import SupplierService from "../Services/SupplierService.js";
 import UnitService from "../Services/UnitService.js";
 import FormatResponseJson from "../Services/FotmatResponse.js";
+import DepotService from "../Services/DepotService.js";
 
 const GetPayment = async (req, res) => {
     let id = req.params.id;
@@ -147,7 +148,7 @@ const StatisticalPaymentInMonth = async (req, res) => {
 const NewPayment = async (req, res) => {
     let paymentNew = req.body;
     // console.log(paymentNew.idStaff, paymentNew.idSupplier, paymentNew.time, paymentNew.idGoods, paymentNew.quantity, paymentNew.price);
-    if (!paymentNew.idStaff || !paymentNew.idSupplier || !paymentNew.time || !paymentNew.idGoods || !paymentNew.quantity || !paymentNew.price) {
+    if (!paymentNew.idStaff || !paymentNew.idSupplier || !paymentNew.time || !paymentNew.idGoods || !paymentNew.quantity || !paymentNew.price || !paymentNew.dates) {
         return res.status(401).json(FormatResponseJson(401, "Invalid data, please check again!", []));
     }
 
@@ -157,6 +158,17 @@ const NewPayment = async (req, res) => {
 
     try {
         let result = await PaymentService.Create(paymentNew);
+        let goodsNew = {};
+        for (let index = 0; index < paymentNew.idGoods.length; index++) {
+            goodsNew = {
+                idGoods: paymentNew.idGoods[index],
+                quantity: paymentNew.quantity[index],
+                date: paymentNew.time,
+            }
+            await DepotService.Create(goodsNew);
+            await GoodsService.UpdateDateManufacture(paymentNew.idGoods[index], paymentNew.dates[index],)
+        }
+
         if (result.length > 0) {
             return res.status(200).json(FormatResponseJson(200, "Create payment successful!", result));
         }

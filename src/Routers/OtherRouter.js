@@ -4,7 +4,7 @@ import * as AccountController from "../Controllers/AccountController.js";
 
 const router = express.Router();
 
-const OrderRouter = (app) => {
+const OtherRouter = (app) => {
     //Route Account
     router.route("/account/:id").put(AccountController.UpdateAcountInfor);
 
@@ -12,4 +12,4 @@ const OrderRouter = (app) => {
     return app.use("/api/v1/restaurant-management-system", router);
 }
 
-export default OrderRouter;
+export default OtherRouter;

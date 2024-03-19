@@ -31,12 +31,25 @@ class BillService {
     //     }
     // }
 
-    async FindOneByIdTableNew(idTable) { // Lay thong tin hoa don cua ban dang an => trang thai = 0 va gio xuat = null;
+    async FindOneByIdTableNew(idTable) { // Lay thong tin hoa don cua ban dang an => trang thai thanh toan = 0 va gio xuat = null;
         try {
             let [result, field] = await connection.execute("SELECT * FROM `hoadon` WHERE idban = ? AND trangthai = 0 ORDER BY ngaygiotao DESC LIMIT 1", [idTable]);
             if (result.length > 0) {
                 return result;
             } return [];
+        } catch (error) {
+            console.log(error);
+            return [];
+        }
+    }
+
+    async FindAllBillUnpaid() { // Lay danh sach thong tin hoa don cua ban dang an => trang thai thanh toan = 0 va gio xuat = null;
+        try {
+            let [result, field] = await connection.execute("SELECT * FROM `hoadon` WHERE  trangthai = 0 ORDER BY ngaygiotao DESC");
+            if (result.length > 0) {
+                return result;
+            }
+            return [];
         } catch (error) {
             console.log(error);
             return [];
@@ -93,6 +106,23 @@ class BillService {
         try {
             let result = [];
             let [resultQuery, field] = await connection.execute("SELECT idhoadon FROM hoadon WHERE ngaygioxuat >= ? AND ngaygioxuat <= ?", [start, end]);
+            for (let i = 0; i < resultQuery.length; i++) {
+                let resultBill = await new BillService().FindOneById(resultQuery[i].idhoadon);
+                result[i] = resultBill;
+            }
+            return result;
+        } catch (e) {
+            console.log(e);
+            return [];
+        }
+    }
+
+    async FindAllInDate(date) {
+        let start = `${date.getFullYear()}-${date.getMonth() + 1}-${date.getDate()} 00:00:00`;
+        let end = `${date.getFullYear()}-${date.getMonth() + 1}-${date.getDate() + 1} 00:00:00`;
+        try {
+            let result = [];
+            let [resultQuery, field] = await connection.execute("SELECT idhoadon FROM hoadon WHERE ngaygiotao >= ? AND ngaygiotao <= ?", [start, end]);
             for (let i = 0; i < resultQuery.length; i++) {
                 let resultBill = await new BillService().FindOneById(resultQuery[i].idhoadon);
                 result[i] = resultBill;

@@ -2,22 +2,22 @@ import AccountService from "../Services/AccountService.js";
 import FormatResponseJson from "../Services/FotmatResponse.js";
 import * as JWT from "../Services/JWTService.js";
 
-const test = () => {
-    let a = 101;
-    let x = a.toString()
+// const test = () => {
+//     let a = 101;
+//     let x = a.toString()
 
-    let reverse = '';
-    for (let index = x.length - 1; index >= 0; index--) {
-        reverse += x[index];
-    }
+//     let reverse = '';
+//     for (let index = x.length - 1; index >= 0; index--) {
+//         reverse += x[index];
+//     }
 
-    console.log(typeof x);
-    if (x === reverse) {
-        console.log(true);
-        return
-    }
-    console.log(false);
-}
+//     console.log(typeof x);
+//     if (x === reverse) {
+//         console.log(true);
+//         return
+//     }
+//     console.log(false);
+// }
 
 const Login = async (req, res) => {
     const { username, password } = req.body;
@@ -31,8 +31,10 @@ const Login = async (req, res) => {
         if (account.length > 0) {
             const token = JWT.tokenSign(account[0].idnhanvien);
             res.setHeader("Authorization", token);
-
-            return res.status(200).json(FormatResponseJson(200, "Login successful!", []));
+            return res.status(200).json(FormatResponseJson(200, "Login successful!", [{
+                tendangnhap: account[0].tendangnhap,
+                quyen: account[0].quyen,
+            }]));
         } else {
             return res.status(401).json(FormatResponseJson(401, "Login failed!", []));
         }
@@ -70,4 +72,4 @@ const UpdateAcountInfor = async (req, res) => {
     };
 }
 
-export { Login, UpdateAcountInfor, test };
+export { Login, UpdateAcountInfor };

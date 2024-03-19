@@ -52,6 +52,7 @@ const GetDishListOrderByType = async (req, res) => {
             }
             // resultData[type.tenloai] = listDish;
             let resultListDishAndType = {
+                idloai: type.idloai,
                 tenloai: type.tenloai,
                 mon: listDish,
             }

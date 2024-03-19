@@ -3,6 +3,7 @@ import FormatResponseJson from "../Services/FotmatResponse.js";
 import AccountService from "../Services/AccountService.js";
 import moment from "moment";
 import CalendrierWorkStaffService from "../Services/CalendrierWorkStaffService.js";
+import * as JWT from "../Services/JWTService.js";
 
 const GetStaff = async (req, res) => {
     let id = req.params.id;
@@ -14,6 +15,7 @@ const GetStaff = async (req, res) => {
             return res.status(404).json(FormatResponseJson(404, "Id is not Number", []));
         }
     }
+
     try {
         let staff = await StaffService.FindOneById(id);
         if (staff.length <= 0) {
@@ -31,6 +33,43 @@ const GetStaff = async (req, res) => {
             staff[0].ngaythamgia = moment(staff[0].ngaythamgia).format("YYYY-MM-DD");
         }
         staff[0].ngaysinh = moment(staff[0].ngaysinh).format("YYYY-MM-DD");
+
+        return res.status(200).json(FormatResponseJson(200, "Successful", staff));
+    } catch (e) {
+        console.log(e);
+        return res.status(500).json(FormatResponseJson(500, "Internal Server Error", []));
+    }
+}
+
+const GetStaffWithToken = async (req, res) => {
+    let { token } = req.body;
+
+    if (!token) {
+        return res.status(404).json(FormatResponseJson(404, "Token is not empty!", []));
+    }
+
+    try {
+        let id = JWT.getUserIdFromToken(token);
+        let staff = await StaffService.FindOneById(id);
+        let account = await AccountService.FindOneById(id);
+        if (staff.length <= 0) {
+            return res.status(400).json(FormatResponseJson(400, `Not found staff id ${id}`, []));
+        }
+
+        //Custom data render
+        if (staff[0].gioitinh == 0) {
+            staff[0].gioitinhchu = 'Nữ';
+        } else {
+            staff[0].gioitinhchu = "Nam";
+        }
+
+        if (staff[0].ngaythamgia !== null) {
+            staff[0].ngaythamgia = moment(staff[0].ngaythamgia).format("YYYY-MM-DD");
+        }
+        staff[0].ngaysinh = moment(staff[0].ngaysinh).format("YYYY-MM-DD");
+
+        staff[0].tendangnhap = account[0].tendangnhap;
+        staff[0].quyen = account[0].quyen;
 
         return res.status(200).json(FormatResponseJson(200, "Successful", staff));
     } catch (e) {
@@ -402,6 +441,7 @@ const SalaryTable = async (req, res) => {
 
 export {
     GetStaff,
+    GetStaffWithToken,
     GetStaffList,
     NewStaff,
     UpdateStaff,
