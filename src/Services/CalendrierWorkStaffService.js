@@ -13,6 +13,18 @@ class CalendriedWorkStaffService {
         }
     }
 
+    async GetCalendrierWorkWithId(idCalendrier) {
+        try {
+            let [result, field] = await connection.execute("SELECT * FROM chittietlamviec  WHERE idlichlamviec = ? ORDER BY chittietlamviec.idnhanvien;", [idCalendrier]);
+            if (result.length > 0) {
+                return result;
+            }
+        } catch (error) {
+            console.log(error);
+            return [];
+        }
+    }
+
     async GetCalendrierArrangeWithPlase(idPhase) {
         try {
             let [result, field] = await connection.execute("SELECT * FROM dangkilamviec LEFT JOIN lichlamviec ON lichlamviec.idlichlamviec = dangkilamviec.idlichlamviec WHERE lichlamviec.giaidoan = ? ORDER BY dangkilamviec.idnhanvien;", [idPhase]);
@@ -25,11 +37,21 @@ class CalendriedWorkStaffService {
         }
     }
 
-    async CreateNewDetailWorkCalendrier(data) {
+    async CreateNewDetailWorkCalendrier(data) {//tao lich lam cho nhan vien
         let { idlichlamviec, idnhanvien, ngay1, ngay2, ngay3, ngay4, ngay5, ngay6, ngay7, } = data;
         try {
             let result = await connection.execute("INSERT INTO `chittietlamviec`(`idlichlamviec`, `idnhanvien`, `ngay1`, `ngay2`, `ngay3`, `ngay4`, `ngay5`, `ngay6`, `ngay7`) VALUES (?,?,?,?,?,?,?,?,?)", [idlichlamviec, idnhanvien, ngay1, ngay2, ngay3, ngay4, ngay5, ngay6, ngay7,]);
-            console.log(result);
+            return true;
+        } catch (error) {
+            console.log(error);
+            return false;
+        }
+    }
+
+    async CreateRegisterWorkStaff(data) {//nhan vien dang ki lich lam moi
+        let { idlichlamviec, idnhanvien, ngay1, ngay2, ngay3, ngay4, ngay5, ngay6, ngay7, } = data;
+        try {
+            let result = await connection.execute("INSERT INTO `dangkilamviec`(`idlichlamviec`, `idnhanvien`, `ngay1`, `ngay2`, `ngay3`, `ngay4`, `ngay5`, `ngay6`, `ngay7`) VALUES (?,?,?,?,?,?,?,?,?)", [idlichlamviec, idnhanvien, ngay1, ngay2, ngay3, ngay4, ngay5, ngay6, ngay7,]);
             return true;
         } catch (error) {
             console.log(error);
@@ -64,7 +86,7 @@ class CalendriedWorkStaffService {
         }
     }
 
-    async CreateNewCalendrier(idPhase, quantityDay) {//  Tao tuan moi
+    async CreateNewCalendrier(idPhase, quantityDay) {//  Tao tuan moi => tao lich lm viec moi
         let lengthWeek = quantityDay / 7;
         try {
             for (let index = 0; index < lengthWeek; index++) {
@@ -87,6 +109,18 @@ class CalendriedWorkStaffService {
             return [];
         }
     }
+
+    async GetListIdCalendrierWithPhase(id) {
+        try {
+            let [result, field] = await connection.execute("SELECT idlichlamviec FROM lichlamviec WHERE giaidoan = ?;", [id]);
+            if (result.length > 0) {
+                return result;
+            }
+        } catch (error) {
+            console.log(error);
+            return [];
+        }
+    } s
 }
 
 export default new CalendriedWorkStaffService();

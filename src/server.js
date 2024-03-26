@@ -12,14 +12,16 @@ const StartServer = () => {
 
         const io = new Server(server, {
             cors: {
-                origin: 'http://localhost:3001',
+                //origin: 'http://localhost:3001',
                 methods: ['GET', 'POST'],
                 credentials: true,
-            }
+            },
         });
 
         io.on('connection', (socket) => {
             console.log("A client connected", socket.id);
+
+            // socket.emit('message', 'Co don moi kia');
         });
 
         app.use(function (req, res, next) {

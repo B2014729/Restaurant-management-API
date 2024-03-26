@@ -238,6 +238,8 @@ const UpdateDishPaid = async (req, res) => {  //Tra mon => Cap nhat trang thai m
         if (!result || result.length === 0) {
             return res.status(401).json(FormatResponseJson(401, "Update payment failed!", []));
         }
+
+        req.io.emit('ondishpaid', 'Món đã xong!');
         return res.status(200).json(FormatResponseJson(200, "Updated payment successful!", [result]));
     } catch (error) {
         console.log(error);
@@ -336,8 +338,8 @@ const GetListOrderInDateAndNoSendToKitchen = async (req, res) => {//Lay danh sac
         console.log(e);
         return res.status(500).json(FormatResponseJson(500, "Internal Server Error!", []));
     }
-
 }
+
 
 export {
     GetOrderDish,
@@ -349,5 +351,4 @@ export {
     DeleteOrderDish,
     SendOrderToKitchen,
     GetListOrderInDateAndNoSendToKitchen,
-
 }

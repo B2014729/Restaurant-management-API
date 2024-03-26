@@ -217,7 +217,6 @@ const GetDishSellALot = async (req, res) => {
         for (let index = 0; index < listDish.length; index++) {
             const dish = listDish[index];
             let dishDetail = await DishService.FindOneById(dish.idmon);
-            let type
             let resultListDishAndType = {
                 mon: dishDetail[0],
                 soluong: dish.soluong,
@@ -244,27 +243,28 @@ const GetStatisticalDish = async (req, res) => { //Thong ke loai mon ban duoc  =
             let data = {
                 idloai: dishDetail[0].idloai,
                 tenloai: dishDetail[0].tenloai,
-                soluong: element.soluong
+                soluong: element.soluong,
             }
             listStatisticalOnTyle.push(data);
         }
 
-        let allType = await DishService.GetAllDishType()
+        let allType = await DishService.GetAllDishType();
         for (let index = 0; index < allType.length; index++) {
             const element = allType[index];
             let quantity = 0;
             for (let i = 0; i < listStatisticalOnTyle.length; i++) {
                 const item = listStatisticalOnTyle[i];
                 if (element.idloai == item.idloai) {
-                    quantity += item.soluong;
+                    quantity += Number(item.soluong);
                 }
             }
             resultData.push({
                 idloai: element.idloai,
                 tenloai: element.tenloai,
                 soluong: quantity,
-            })
+            });
         }
+
         return res.status(200).json(FormatResponseJson(200, "Successful", resultData));
     } catch (e) {
         console.log(e);

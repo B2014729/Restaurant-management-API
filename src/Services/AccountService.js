@@ -40,6 +40,32 @@ class AccountService {
         }
     }
 
+    async CheckCustomer(username, password) {
+        try {
+            let [account, field] = await connection.execute("SELECT * FROM khachhang WHERE tendangnhap = ? AND matkhau = ?", [username, password]);
+            if (account.length > 0) {
+                return account;
+            }
+            return [];
+        } catch (error) {
+            console.log(error);
+            return [];
+        }
+    }
+
+    async Register(username, password) {
+        try {
+            await connection.execute("INSERT INTO `khachhang`(`tendangnhap`, `matkhau`) VALUES (?,?)", [username, password]);
+            let [account, field] = await connection.execute("SELECT * FROM khachhang ORDER BY idkhachhang DESC LIMIT 1;");
+            if (account.length > 0) {
+                return account;
+            }
+            return [];
+        } catch (error) {
+            console.log(error);
+            return [];
+        }
+    }
     async Create(newAccount) {
         let { idAccount, username, password, role } = newAccount;
         try {

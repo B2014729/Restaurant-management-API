@@ -6,6 +6,12 @@ const router = express.Router();
 const CalendriedWorkStaffRouter = (app) => {
     router.route("/phase")
         .get(CalendriedWorkStaffController.GetAllPhase);
+    router.route("/get-with-id-calendrier/:idCalendrier")
+        .get(CalendriedWorkStaffController.GetCalendrierDetailWithId);
+    router.route("/get-id-calendrier-in-phase/:idPhase")
+        .get(CalendriedWorkStaffController.GetIdCalendrierWithPhase);
+    router.route('/register-work')
+        .post(CalendriedWorkStaffController.CreateRegisterWorkStaff);
     router.route("/phase/create")
         .post(CalendriedWorkStaffController.CreatePhase);
     router.route("/:idPhase")

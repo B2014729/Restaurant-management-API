@@ -115,7 +115,7 @@ class DishService {
 
     async GetDishSellALot() {
         try {
-            let [result, field] = await connection.execute("SELECT chitietdatmon.idmon, COUNT(chitietdatmon.idmon) soluong FROM `chitietdatmon`  GROUP BY chitietdatmon.idmon ORDER BY `soluong` DESC");
+            let [result, field] = await connection.execute("SELECT chitietdatmon.idmon, SUM(chitietdatmon.soluong) soluong FROM `chitietdatmon`  GROUP BY chitietdatmon.idmon ORDER BY `soluong` DESC");
             return result;
         } catch (e) {
             console.log(e);
@@ -135,7 +135,7 @@ class DishService {
 
     async StatisticalOnDishSell() {
         try {
-            let [result, field] = await connection.execute("SELECT idmon, COUNT(soluong) soluong FROM `chitietdatmon` GROUP BY idmon;");
+            let [result, field] = await connection.execute("SELECT idmon, SUM(soluong) soluong FROM `chitietdatmon` GROUP BY idmon;");
             return result;
         } catch (e) {
             console.log(e);
