@@ -1,9 +1,10 @@
 import express from "express";
 import RouterWeb from "./Routers/RouterWeb.js";
-import MiddeleWareConfig from "./Configs/ConfigMiddelware.js";
+import MiddelWareConfig from "./Configs/ConfigMiddelware.js";
 import { Server } from "socket.io";
 import http from 'http';
-
+// import dotenv from 'dotenv';
+// dotenv.config();
 
 const StartServer = () => {
     try {
@@ -20,7 +21,6 @@ const StartServer = () => {
 
         io.on('connection', (socket) => {
             console.log("A client connected", socket.id);
-
             // socket.emit('message', 'Co don moi kia');
         });
 
@@ -29,7 +29,7 @@ const StartServer = () => {
             next();
         });
 
-        MiddeleWareConfig(app);
+        MiddelWareConfig(app);          //MiddelWare config
         RouterWeb(app);                 //File chua tat ca cac khai bao route
 
         app.use((req, res) => {

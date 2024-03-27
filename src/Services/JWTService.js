@@ -1,6 +1,8 @@
 import jwt from "jsonwebtoken";
+import dotenv from 'dotenv';
+dotenv.config();
 
-const privateKey = 'cHJpdmF0ZSBrZXkgdG8gc2lnbiB0b2tlbg==';
+const privateKey = process.env.JWT_PRIVATE_KEY;
 
 const tokenSign = (id) => {
     return jwt.sign({ userId: id }, privateKey);
@@ -13,5 +15,5 @@ const getUserIdFromToken = (token) => {
 
 export {
     tokenSign,
-    getUserIdFromToken
+    getUserIdFromToken,
 }
