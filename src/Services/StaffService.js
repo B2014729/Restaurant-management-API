@@ -61,6 +61,19 @@ class StaffService {
         }
     }
 
+    async UploadAvatar(id, url) {
+        try {
+            let [update, field] = await connection.execute("UPDATE `nhanvien` SET `hinhanh`= ? WHERE idnhanvien = ?", [url, id]);
+            if (update.changedRows !== 0) {
+                let [result, field] = await new StaffService().FindOneById(id);
+                return result;
+            }
+        } catch (e) {
+            console.log(e);
+            return [];
+        }
+    }
+
 }
 
 export default new StaffService();

@@ -1,10 +1,29 @@
 import express from "express";
 
 import * as StaffController from "../Controllers/StaffController.js";
+import multer from "multer";
+import appRootPath from "app-root-path";
+
+
+// Upload file image ------------------------------
+const storage = multer.diskStorage({
+    //Noi luu anh tren server
+    destination: (req, file, cb) => {
+        cb(null, appRootPath + '/src/public/images/');
+    },
+    //Set ten moi cho anh
+    filename: function (req, file, cb) {
+        const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9)
+        cb(null, file.fieldname + '-' + uniqueSuffix + '.png')
+    }
+});
+
+const uploadFile = multer({ storage: storage });
 
 const router = express.Router();
 
 const StaffWebRoute = (app) => {
+
     router.route("/list")
         .get(StaffController.GetStaffList);
     router.route("/token")
@@ -13,6 +32,8 @@ const StaffWebRoute = (app) => {
         .get(StaffController.GetStaff)
         .put(StaffController.UpdateStaff)
         .delete(StaffController.DeleteStaff);
+    router.route("/upload-avatar/:token")
+        .post(uploadFile.single('avatar'), StaffController.UploadAvatar);
     router.route("/create")
         .post(StaffController.NewStaff);
     router.route("/salary/:idPhase")

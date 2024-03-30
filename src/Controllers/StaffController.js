@@ -156,15 +156,20 @@ const NewStaff = async (req, res) => {
 
 const UpdateStaff = async (req, res) => {
     let id = req.params.id;
+    let token = req.params.id;
     let staffUpdate = req.body;
-
     if (!id) {
         return res.status(404).json(FormatResponseJson(404, "Id is not empty!", []));
     } else {
         id = Number(id);
         staffUpdate.gender = Number(staffUpdate.gender);
         if (isNaN(id)) {
-            return res.status(404).json(FormatResponseJson(404, "Id is not Number", []));
+            try {
+                id = JWT.getUserIdFromToken(token);//Neu nguoi dung k truyen id ma truyen token
+            } catch (error) {
+                console.log(error);
+                return res.status(500).json(FormatResponseJson(500, "Internal Server Error", []));
+            }
         }
     }
 
@@ -216,6 +221,50 @@ const UpdateStaff = async (req, res) => {
             return res.status(401).json(FormatResponseJson(401, "Updated staff failed!", []));
         }
         return res.status(200).json(FormatResponseJson(200, "Updated staff successful!", [staffUpdated]));
+
+    } catch (e) {
+        console.log(e);
+        return res.status(500).json(FormatResponseJson(500, "Internal Server Error", []));
+    }
+}
+
+const UploadAvatar = async (req, res) => {
+    let token = req.params.token;
+    if (!token) {
+        return res.status(404).json(FormatResponseJson(404, "Token is not empty!", []));
+    }
+    let image = '';
+    if (req.hasOwnProperty('file')) {
+        if (req.file.hasOwnProperty('filename')) {
+            image = 'http://localhost:8000/images/' + req.file.filename;
+        }
+    } else {
+        return res.status(400).json(FormatResponseJson(400, "Upload faild!", []));
+    }
+
+    try {
+        let id = JWT.getUserIdFromToken(token);
+        if (!id) {
+            return res.status(404).json(FormatResponseJson(404, "Id is not empty!", []));
+        } else {
+            id = Number(id);
+            if (isNaN(id)) {
+                return res.status(404).json(FormatResponseJson(404, "Id is not Number", []));
+            }
+        }
+
+        let staff = await StaffService.FindOneById(id);
+
+        if (staff.length === 0) {
+            return res.status(400).json(FormatResponseJson(400, "Staff id is not found!", []));
+        }
+
+        let staffUploadAvatar = await StaffService.UploadAvatar(id, image);
+
+        if (!staffUploadAvatar) {
+            return res.status(401).json(FormatResponseJson(401, "Updated staff failed!", []));
+        }
+        return res.status(200).json(FormatResponseJson(200, "Updated staff successful!", [staffUploadAvatar]));
 
     } catch (e) {
         console.log(e);
@@ -445,6 +494,7 @@ export {
     GetStaffList,
     NewStaff,
     UpdateStaff,
+    UploadAvatar,
     DeleteStaff,
     Salary,
     SalaryTable,

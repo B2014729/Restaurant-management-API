@@ -21,7 +21,7 @@ class PaymentService {
     async FindAll() {
         try {
             let result = [];
-            let [resultQuery, field] = await connection.execute("SELECT idphieuchi FROM phieuchi");
+            let [resultQuery, field] = await connection.execute("SELECT idphieuchi FROM phieuchi ORDER BY ngaygio DESC");
             for (let i = 0; i < resultQuery.length; i++) {
                 let resultPayment = await new PaymentService().FindOneById(resultQuery[i].idphieuchi);
                 result[i] = resultPayment;
@@ -34,12 +34,13 @@ class PaymentService {
     }
 
     async Create(PaymentNew) {
+        let idphieuchi = 0;
         try {
             let { idStaff, idSupplier, time, status, idGoods, quantity, price } = PaymentNew;
             await connection.execute("INSERT INTO `phieuchi`(`idnhanvien`, `idnhacungcap`, `ngaygio`,  `trangthai`) VALUES (?,?,?,?)", [idStaff, idSupplier, time, status]);
 
             let [result, field] = await connection.execute("SELECT * FROM phieuchi ORDER BY idphieuchi DESC LIMIT 1;");
-
+            idphieuchi = result[0].idphieuchi;
             for (let i = 0; i < idGoods.length; i++) {
                 await connection.execute("INSERT INTO `chitietphieuchi`(`idphieuchi`, `idhanghoa`, `soluong`, `dongia`) VALUES (?,?,?,?)", [result[0].idphieuchi, idGoods[i], quantity[i], price[i]]);
             }
@@ -47,6 +48,7 @@ class PaymentService {
             let payment = await new PaymentService().FindOneById(result[0].idphieuchi);
             return payment;
         } catch (e) {
+            await connection.execute("DELETE FROM phieuchi WHERE idphieuchi = ? ", [idphieuchi]);
             console.log(e);
             return [];
         }
