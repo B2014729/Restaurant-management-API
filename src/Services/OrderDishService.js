@@ -35,7 +35,7 @@ class OrderDishService {
     async FindAllDishPaidInDate(date) {
         let dateFormat = `${date.getFullYear()}-${date.getMonth() + 1}-${date.getDate()} 00:00:00`;
         try {
-            let [resultQuery, field] = await connection.execute("SELECT * FROM chitietdatmon WHERE tramon >= ? AND trangthai = 1", [dateFormat]);
+            let [resultQuery, field] = await connection.execute("SELECT * FROM chitietdatmon WHERE tramon >= ? AND trangthai = 1 ORDER BY tramon DESC", [dateFormat]);
             if (resultQuery.length > 0) {
                 return resultQuery;
             }

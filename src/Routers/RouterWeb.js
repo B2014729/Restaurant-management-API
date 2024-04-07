@@ -12,8 +12,10 @@ import BillWebRouter from "./BillRouter.js";
 import CalendriedWorkStaffRouter from "./CalendriedWorkStaffRouter.js";
 import DepotWebRoute from "./DepotRouter.js";
 import EvaluateWebRouter from "./EvaluateRouter.js";
+import DatasetRouter from "./DataSetRouter.js";
 
 import OtherRouter from "./OtherRouter.js";
+
 
 export default (app) => {
     AccountRouter(app);         //Route tai khoan
@@ -29,7 +31,8 @@ export default (app) => {
     BillWebRouter(app);         //Route hoa don
     CalendriedWorkStaffRouter(app);//Route lich lam viec cua nhan vien
     DepotWebRoute(app); 	    //Route kho
-    EvaluateWebRouter(app)      //Route quan li danh gia cua khach hang
+    EvaluateWebRouter(app);     //Route quan li danh gia cua khach hang
+    DatasetRouter(app);         //Route lay dataset du doan doanh thu
 
     OtherRouter(app);
 }

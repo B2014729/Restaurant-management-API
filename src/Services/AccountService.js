@@ -85,9 +85,9 @@ class AccountService {
     }
 
     async Update(idAccount, accountUpdate) {
-        let { username, password, role } = accountUpdate;
+        let { username, password } = accountUpdate;
         try {
-            let [update, field] = await connection.execute("UPDATE `taikhoan` SET `tendangnhap`= ?,`matkhau`= ?,`quyen`= ? WHERE idnhanvien = ?", [username, password, role, idAccount]);
+            let [update, field] = await connection.execute("UPDATE `taikhoan` SET `tendangnhap`= ?,`matkhau`= ? WHERE idnhanvien = ?", [username, password, idAccount]);
             if (update.changedRows !== 0) {
                 let [account, field] = await new AccountService().FindOneById(idAccount);
                 return account;

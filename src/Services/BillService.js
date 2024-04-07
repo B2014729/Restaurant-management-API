@@ -119,10 +119,12 @@ class BillService {
 
     async FindAllInDate(date) {
         let start = `${date.getFullYear()}-${date.getMonth() + 1}-${date.getDate()} 00:00:00`;
-        let end = `${date.getFullYear()}-${date.getMonth() + 1}-${date.getDate() + 1} 00:00:00`;
+        let end = `${date.getFullYear()}-${date.getMonth() + 1}-${date.getDate()} 23:59:00`;
+
+
         try {
             let result = [];
-            let [resultQuery, field] = await connection.execute("SELECT idhoadon FROM hoadon WHERE ngaygiotao >= ? AND ngaygiotao <= ?", [start, end]);
+            let [resultQuery, field] = await connection.execute("SELECT idhoadon FROM hoadon WHERE ngaygiotao >= ? AND ngaygiotao <= ? ORDER BY ngaygiotao DESC", [start, end]);
             for (let i = 0; i < resultQuery.length; i++) {
                 let resultBill = await new BillService().FindOneById(resultQuery[i].idhoadon);
                 result[i] = resultBill;

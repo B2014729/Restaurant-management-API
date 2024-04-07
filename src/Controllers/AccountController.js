@@ -80,13 +80,14 @@ const Login = async (req, res) => {
 // }
 
 const UpdateAcountInfor = async (req, res) => {
-    let idAccount = req.params.id;
-    let { username, password } = req.body;
+    let token = req.params.token;
 
+    let { username, password } = req.body;
     if (!username && !password) {
         return res.status(400).json(FormatResponseJson(400, "Username and password is not empty!", []));
     }
     try {
+        let idAccount = JWT.getUserIdFromToken(token);
         let account = await AccountService.FindOneById(idAccount);
         if (account.length === 0) {
             return res.status(400).json(FormatResponseJson(400, "Account is not exist!", []));
@@ -94,7 +95,6 @@ const UpdateAcountInfor = async (req, res) => {
         let updateAccount = {
             username: username,
             password: password,
-            role: account[0].quyen
         }
         let accountUpdated = await AccountService.Update(idAccount, updateAccount);
         if (accountUpdated.length === 0) {
@@ -106,7 +106,6 @@ const UpdateAcountInfor = async (req, res) => {
         return res.status(500).json(FormatResponseJson(500, "Internal Server Error!", []));
     };
 }
-
 
 const Register = async (req, res) => {
     let { username, password } = req.body;
@@ -126,6 +125,33 @@ const Register = async (req, res) => {
     };
 }
 
+const CheckPassword = async (req, res) => {
+    let token = req.params.token;
+
+    let { password } = req.body;
+    if (!password) {
+        return res.status(400).json(FormatResponseJson(400, "Password is not empty!", []));
+    }
+
+    try {
+        let idAccount = JWT.getUserIdFromToken(token);
+
+        let account = await AccountService.FindOneById(idAccount);
+        if (account.length === 0) {
+            return res.status(400).json(FormatResponseJson(400, "Account is not exist!", []));
+        }
+
+        if (password != account[0].matkhau) {
+            return res.status(400).json(FormatResponseJson(400, "Wrong password!", []));
+        }
+
+        return res.status(200).json(FormatResponseJson(200, "Password suitable!", [true]));
+    } catch (error) {
+        console.log(error);
+        return res.status(500).json(FormatResponseJson(500, "Internal Server Error!", []));
+    }
+
+}
 
 
-export { Login, UpdateAcountInfor, Register };
+export { Login, UpdateAcountInfor, Register, CheckPassword };

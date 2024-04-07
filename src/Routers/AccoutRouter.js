@@ -8,6 +8,10 @@ const CustomerWebRoute = (app) => {
 
     router.route("/login")
         .post(AccountController.Login);
+    router.route("/:token")
+        .put(AccountController.UpdateAcountInfor);
+    router.route("/check-pass/:token")
+        .post(AccountController.CheckPassword);
     // router.route("/customer-login")
     //     .post(AccountController.LoginCustomer);
     router.route("/customer-register")

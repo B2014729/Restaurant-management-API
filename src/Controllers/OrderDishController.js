@@ -102,7 +102,6 @@ const GetOrderDishList = async (req, res) => {
 
 const NewOrderDish = async (req, res) => {
     let orderNew = req.body;
-    orderNew.idStaff = 3; //TEST
 
     const now = new Date();
     orderNew.dateTime = `${now.getFullYear()}-${now.getMonth() + 1}-${now.getDate()} ${now.getHours()}:${now.getMinutes()}`;
@@ -115,6 +114,7 @@ const NewOrderDish = async (req, res) => {
     }
 
     try {
+        orderNew.idStaff = JWT.getUserIdFromToken(orderNew.token) || 3;
         let result = await OrderDishService.Create(orderNew);
 
         if (result.length > 0) {
