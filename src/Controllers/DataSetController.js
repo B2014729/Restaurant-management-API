@@ -124,7 +124,7 @@ import dataset_revuene from "../Services/dataset_revuene.js";
 // }
 
 const GetAll = async (req, res) => {
-    return 'Hello';
+    return res.send('Hello world');
 }
 
 // const CreateDataSet = async (req, res) => {

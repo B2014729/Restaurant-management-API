@@ -13,6 +13,7 @@ import CalendriedWorkStaffRouter from "./CalendriedWorkStaffRouter.js";
 import DepotWebRoute from "./DepotRouter.js";
 import EvaluateWebRouter from "./EvaluateRouter.js";
 import DatasetRouter from "./DataSetRouter.js";
+import PromotionRoute from "./PromotionRouter.js";
 
 import OtherRouter from "./OtherRouter.js";
 
@@ -33,6 +34,7 @@ export default (app) => {
     DepotWebRoute(app); 	    //Route kho
     EvaluateWebRouter(app);     //Route quan li danh gia cua khach hang
     DatasetRouter(app);         //Route lay dataset du doan doanh thu
+    PromotionRoute(app);        //Route chuong trinh khuyen mai
 
     OtherRouter(app);
 }
