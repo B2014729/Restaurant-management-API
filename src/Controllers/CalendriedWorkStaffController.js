@@ -49,44 +49,45 @@ const GetCalendrierWithPhase = async (req, res) => {
 
     try {
         let calendrier = await CalendrierWorkStaffService.GetCalendrierWorkWithPlase(idPhase);
-        if (!calendrier || calendrier.length <= 0) {
-            return res.status(400).json(FormatResponseJson(400, `Not found customer id ${idPhase}`, []));
-        }
+
+        // return res.status(400).json(FormatResponseJson(400, `Not found customer id ${idPhase}`, []));
+
 
         let weekOne = [];
         let weekTwo = [];
         let weekThree = [];
         let weekFour = [];
         let weekFive = [];
+        if (calendrier != undefined) {
+            for (let index = 0; index < calendrier.length; index++) {
+                let week = calendrier[index].tuan;
+                delete calendrier[index].idgiaidoan;
+                delete calendrier[index].tuan;
 
-        for (let index = 0; index < calendrier.length; index++) {
-            let week = calendrier[index].tuan;
-            delete calendrier[index].idgiaidoan;
-            delete calendrier[index].tuan;
+                let resultStaff = await StaffService.FindOneById(calendrier[index].idnhanvien); // Lay thong tin nhan vien lap hoa don
 
-            let resultStaff = await StaffService.FindOneById(calendrier[index].idnhanvien); // Lay thong tin nhan vien lap hoa don
+                calendrier[index].tennhanvien = resultStaff[0].hoten;
+                calendrier[index].chucvu = resultStaff[0].tenchucvu;
 
-            calendrier[index].tennhanvien = resultStaff[0].hoten;
-            calendrier[index].chucvu = resultStaff[0].tenchucvu;
-
-            switch (week) {
-                case 1:
-                    weekOne.push(calendrier[index])
-                    break;
-                case 2:
-                    weekTwo.push(calendrier[index])
-                    break;
-                case 3:
-                    weekThree.push(calendrier[index])
-                    break;
-                case 4:
-                    weekFour.push(calendrier[index])
-                    break;
-                case 5:
-                    weekFive.push(calendrier[index])
-                    break;
-                default:
-                    break;
+                switch (week) {
+                    case 1:
+                        weekOne.push(calendrier[index])
+                        break;
+                    case 2:
+                        weekTwo.push(calendrier[index])
+                        break;
+                    case 3:
+                        weekThree.push(calendrier[index])
+                        break;
+                    case 4:
+                        weekFour.push(calendrier[index])
+                        break;
+                    case 5:
+                        weekFive.push(calendrier[index])
+                        break;
+                    default:
+                        break;
+                }
             }
         }
 

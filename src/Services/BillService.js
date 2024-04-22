@@ -103,6 +103,8 @@ class BillService {
 
 
     async FindAllWhereTime(start, end) { // Lay cac hoa don trong giai doan start => end
+        start = new Date(start);
+        end = new Date(end);
         try {
             let result = [];
             let [resultQuery, field] = await connection.execute("SELECT idhoadon FROM hoadon WHERE ngaygioxuat >= ? AND ngaygioxuat <= ?", [start, end]);

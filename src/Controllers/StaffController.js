@@ -108,6 +108,15 @@ const NewStaff = async (req, res) => {
         return res.status(401).json(FormatResponseJson(401, "Invalid data, please check again!", []));
     }
 
+    staffNew.image = '';
+    if (req.hasOwnProperty('file')) {
+        if (req.file.hasOwnProperty('filename')) {
+            staffNew.image = 'http://localhost:8000/images/' + req.file.filename;
+        }
+    } else {
+        staffNew.image = '';
+    }
+
     //Set account information
     let username = staffNew.fullname.substring(staffNew.fullname.indexOf(" "));
     username = username.replaceAll(" ", "");
@@ -233,6 +242,7 @@ const UploadAvatar = async (req, res) => {
     if (!token) {
         return res.status(404).json(FormatResponseJson(404, "Token is not empty!", []));
     }
+
     let image = '';
     if (req.hasOwnProperty('file')) {
         if (req.file.hasOwnProperty('filename')) {

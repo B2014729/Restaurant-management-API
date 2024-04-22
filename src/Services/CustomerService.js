@@ -62,8 +62,9 @@ class CustomerService {
 
     async GetQuantityOrderTable(idCustomer) {
         try {
-            let [result, field] = await connection.execute("SELECT COUNT(idkhachhang) soluong, idkhachhang FROM `datban` WHERE idkhachhang = ?", [idCustomer]);
+            let [result, field] = await connection.execute("SELECT COUNT(idkhachhang) soluong, idkhachhang FROM `datban` WHERE idkhachhang = ? GROUP BY idkhachhang", [idCustomer]);
             if (result.length > 0) {
+
                 return result;
             }
             return [{

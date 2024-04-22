@@ -14,7 +14,6 @@ const BillWebRouter = (app) => {
         .get(BillController.GetBillListWhereTime);
     router.route("/list/date/:date")
         .get(BillController.GetListBillInDate);
-
     router.route("/table-list")         //Lay danh sach bill chua thanh  toan => ban dang an
         .get(BillController.GetBillEating);
     router.route("/table/:idtable")

@@ -35,7 +35,7 @@ const StaffWebRoute = (app) => {
     router.route("/upload-avatar/:token")
         .post(uploadFile.single('avatar'), StaffController.UploadAvatar);
     router.route("/create")
-        .post(StaffController.NewStaff);
+        .post(uploadFile.single('avatar'), StaffController.NewStaff);
     router.route("/salary/:idPhase")
         .get(StaffController.SalaryTable);
     router.route("/salary/:id/calendrier/:idPhase")

@@ -5,6 +5,7 @@ import OrderDishService from "../Services/OrderDishService.js";
 import FormatResponseJson from "../Services/FotmatResponse.js";
 import BillService from "../Services/BillService.js";
 import TableService from "../Services/TableService.js";
+import PromotionService from "../Services/PromotionService.js";
 import * as JWT from "../Services/JWTService.js";
 
 const GetOrderDish = async (req, res) => {
@@ -28,14 +29,45 @@ const GetOrderDish = async (req, res) => {
 
         let resultStaff = await StaffService.FindOneById(orderDish.idnhanvien);
         let resultDetail = [];
+        let Promotion = [];
 
         for (let i = 0; i < orderDishDetail.length; i++) {
-            let result = await DishService.FindOneById(orderDishDetail[i].idmon);
-            resultDetail[i] = {
-                mon: result[0],
-                soluong: orderDishDetail[i].soluong,
-                trangthai: orderDishDetail[i].trangthai,
-                ghichu: orderDishDetail[i].ghichu,
+            if (orderDishDetail[i].idmon != 100) { //id mon 100 la mon mac dinh khong co
+                let result = await DishService.FindOneById(orderDishDetail[i].idmon);
+                resultDetail[i] = {
+                    mon: result[0],
+                    soluong: orderDishDetail[i].soluong,
+                    trangthai: orderDishDetail[i].trangthai,
+                    ghichu: orderDishDetail[i].ghichu,
+                }
+            } else {
+                if (orderDishDetail[i].idcombo != 100) {//id mon 100 la mon mac dinh khong co
+                    Promotion = await PromotionService.FindOneById(orderDishDetail[i].idcombo);
+                    if (Promotion.length <= 0) {
+                        return res.status(400).json(FormatResponseJson(400, `Not found Promotion id ${id}`, []));
+                    }
+                    let ListDish = Promotion[1];
+                    let LishDishDetail = [];
+                    let totalPayment = 0;
+                    for (let index = 0; index < ListDish.length; index++) {
+                        const element = ListDish[index];
+                        let resultDish = await DishService.FindOneById(element.idmon);
+                        if (resultDish && resultDish.length > 0) {
+                            resultDish[0].soluong = element.soluong;
+                            LishDishDetail.push(resultDish[0]);
+                            totalPayment += resultDish[0].soluong * resultDish[0].gia;
+                        }
+                    }
+                    Promotion[0][0].giamgia = ((totalPayment * Promotion[0][0].giatrikhuyenmai) / 100)
+                    Promotion[0][0].thanhtoan = totalPayment - Promotion[0][0].giamgia;
+                    resultDetail[i] = {
+                        khuyenmai: Promotion[0][0],
+                        soluong: orderDishDetail[i].soluong,
+                        chitiet: LishDishDetail,
+                        trangthai: orderDishDetail[i].trangthai,
+                        ghichu: orderDishDetail[i].ghichu,
+                    };
+                }
             }
         }
 
@@ -73,12 +105,42 @@ const GetOrderDishList = async (req, res) => {
             let resultDetail = [];
 
             for (let i = 0; i < orderDishDetail.length; i++) {
-                let result = await DishService.FindOneById(orderDishDetail[i].idmon);
-                resultDetail[i] = {
-                    mon: result[0],
-                    soluong: orderDishDetail[i].soluong,
-                    trangthai: orderDishDetail[i].trangthai,
-                    ghichu: orderDishDetail[i].ghichu,
+                if (orderDishDetail[i].idmon != 100) {//id mon 100 la mon mac dinh khong co
+                    let result = await DishService.FindOneById(orderDishDetail[i].idmon);
+                    resultDetail[i] = {
+                        mon: result[0],
+                        soluong: orderDishDetail[i].soluong,
+                        trangthai: orderDishDetail[i].trangthai,
+                        ghichu: orderDishDetail[i].ghichu,
+                    }
+                } else {
+                    if (orderDishDetail[i].idcombo != 100) {//id mon 100 la mon mac dinh khong co
+                        let Promotion = await PromotionService.FindOneById(orderDishDetail[i].idcombo);
+                        if (Promotion.length <= 0) {
+                            return res.status(400).json(FormatResponseJson(400, `Not found Promotion id ${id}`, []));
+                        }
+                        let ListDish = Promotion[1];
+                        let LishDishDetail = [];
+                        let totalPayment = 0;
+                        for (let index = 0; index < ListDish.length; index++) {
+                            const element = ListDish[index];
+                            let resultDish = await DishService.FindOneById(element.idmon);
+                            if (resultDish && resultDish.length > 0) {
+                                resultDish[0].soluong = element.soluong;
+                                LishDishDetail.push(resultDish[0]);
+                                totalPayment += resultDish[0].soluong * resultDish[0].gia;
+                            }
+                        }
+                        Promotion[0][0].giamgia = ((totalPayment * Promotion[0][0].giatrikhuyenmai) / 100)
+                        Promotion[0][0].thanhtoan = totalPayment - Promotion[0][0].giamgia;
+                        resultDetail[i] = {
+                            khuyenmai: Promotion[0][0],
+                            soluong: orderDishDetail[i].soluong,
+                            chitiet: LishDishDetail,
+                            trangthai: orderDishDetail[i].trangthai,
+                            ghichu: orderDishDetail[i].ghichu,
+                        };
+                    }
                 }
             }
 
@@ -184,6 +246,7 @@ const GetListDishPaidInDate = async (req, res) => {
     date = new Date(date);
     try {
         let dishList = await OrderDishService.FindAllDishPaidInDate(date);
+
         if (dishList.length <= 0) {
             return res.status(400).json(FormatResponseJson(400, `Not found order dish list`, []));
         }
@@ -193,17 +256,53 @@ const GetListDishPaidInDate = async (req, res) => {
         for (let i = 0; i < dishList.length; i++) {
             let element = dishList[i];
 
-            let dishInforDetail = await DishService.FindOneById(element.idmon);
 
-            resultDishList.push({
-                iddatmon: element.iddatmon,
-                trangthai: element.trangthai,
-                thoigiantra: element.tramon,
-                soluong: element.soluong,
-                mon: dishInforDetail[0],
-                idnhanvien: element.idnhanvien,
-                ghichu: element.ghichu,
-            });
+            if (element.idmon != 100) {
+                let detailDish = await DishService.FindOneById(element.idmon);
+                resultDishList.push({
+                    iddatmon: element.iddatmon,
+                    trangthai: element.trangthai,
+                    thoigiantra: element.tramon,
+                    soluong: element.soluong,
+                    mon: detailDish[0],
+                    idnhanvien: element.idnhanvien,
+                    ghichu: element.ghichu,
+                });
+            } else {
+                if (element.idcombo != 100) {
+                    let promotion = await PromotionService.FindOneById(element.idcombo);
+                    if (promotion.length <= 0) {
+                        return res.status(400).json(FormatResponseJson(400, `Not found Promotion id ${id}`, []));
+                    }
+                    let ListDish = promotion[1];
+                    let LishDishDetail = [];
+                    let totalPayment = 0;
+                    for (let index = 0; index < ListDish.length; index++) {
+                        const elementDish = ListDish[index];
+                        let resultDish = await DishService.FindOneById(elementDish.idmon);
+                        if (resultDish && resultDish.length > 0) {
+                            resultDish[0].soluong = elementDish.soluong;
+                            LishDishDetail.push(resultDish[0]);
+                            totalPayment += resultDish[0].soluong * resultDish[0].gia;
+                        }
+                    }
+                    promotion[0][0].giamgia = ((totalPayment * promotion[0][0].giatrikhuyenmai) / 100)
+                    promotion[0][0].thanhtoan = totalPayment - promotion[0][0].giamgia;
+
+                    resultDishList.push({
+                        iddatmon: element.iddatmon,
+                        trangthai: element.trangthai,
+                        thoigiantra: element.tramon,
+                        soluong: element.soluong,
+                        khuyenmai: {
+                            thongtinkhuyenmai: promotion[0][0],
+                            chitiet: LishDishDetail,
+                        },
+                        idnhanvien: element.idnhanvien,
+                        ghichu: element.ghichu,
+                    });
+                }
+            }
         }
 
         return res.status(200).json(FormatResponseJson(200, "Successful", resultDishList));
@@ -215,11 +314,12 @@ const GetListDishPaidInDate = async (req, res) => {
 
 const UpdateDishPaid = async (req, res) => {  //Tra mon => Cap nhat trang thai mon da tra mon tu bep
     let idOrder = req.params.id;
-    let { idDish, token } = req.body;
+    let { idDish, idCombo, token } = req.body;
 
-    if (!idOrder || !idDish || !token) {
+    if (!idOrder || !idCombo || !idDish || !token) {
         return res.status(401).json(FormatResponseJson(401, "Invalid data, please check again!", []));
     }
+
     if (!idOrder) {
         return res.status(404).json(FormatResponseJson(404, "Id is not empty!", []));
     } else {
@@ -231,10 +331,18 @@ const UpdateDishPaid = async (req, res) => {  //Tra mon => Cap nhat trang thai m
 
     let idStaff = JWT.getUserIdFromToken(token);
     let timePaid = new Date();
-    console.log(idStaff);
 
     try {
-        let result = await OrderDishService.UpdateStatusDish(idOrder, idDish, timePaid, idStaff);
+
+        let result = null;
+        if (idDish != 100) {
+            result = await OrderDishService.UpdateStatusDish(idOrder, idDish, timePaid, idStaff);
+        } else {
+            if (idCombo != '100') {
+                result = await OrderDishService.UpdateStatusCombo(idOrder, idCombo, timePaid, idStaff);
+            }
+        }
+
         if (!result || result.length === 0) {
             return res.status(401).json(FormatResponseJson(401, "Update payment failed!", []));
         }

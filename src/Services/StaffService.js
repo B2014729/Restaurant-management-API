@@ -22,9 +22,9 @@ class StaffService {
 
     async Create(staff) {
         try {
-            let { fullname, dateofbirth, gender, idnumber, address, phone, idposition, status, idsalary, datestart } = staff;
-            await connection.execute("INSERT INTO `nhanvien`(`hoten`, `ngaysinh`, `gioitinh`, `cccd`, `diachi`, `sodienthoai`, `idchucvu`, `ngaythamgia`, `trangthai`, `idluong` ) VALUES (?,?,?,?,?,?,?,?,?,?)",
-                [fullname, dateofbirth, gender, idnumber, address, phone, idposition, datestart, status, idsalary])
+            let { fullname, dateofbirth, gender, idnumber, address, phone, idposition, status, idsalary, datestart, image } = staff;
+            await connection.execute("INSERT INTO `nhanvien`(`hoten`, `ngaysinh`, `gioitinh`, `cccd`, `diachi`, `sodienthoai`, `idchucvu`, `ngaythamgia`, `trangthai`, `idluong`, `hinhanh` ) VALUES (?,?,?,?,?,?,?,?,?,?,?)",
+                [fullname, dateofbirth, gender, idnumber, address, phone, idposition, datestart, status, idsalary, image])
             let [result, field] = await connection.execute("SELECT * FROM nhanvien ORDER BY idnhanvien DESC LIMIT 1;");
             return result;
         } catch (e) {

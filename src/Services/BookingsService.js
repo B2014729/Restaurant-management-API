@@ -53,9 +53,9 @@ class BookingsService {
         }
     }
 
-    async Confirm(idBookings) {
+    async Confirm(idBookings, idTable, status) {
         try {
-            let [update, field] = await connection.execute("UPDATE `datban` SET trangthai = ? WHERE iddatban = ?", [1, idBookings])
+            let [update, field] = await connection.execute("UPDATE `datban` SET trangthai = ?, idban = ? WHERE iddatban = ?", [status, idTable, idBookings])
             if (update.changedRows !== 0) {
                 let [result, field] = await new BookingsService().FindOneById(idBookings);
                 return result;

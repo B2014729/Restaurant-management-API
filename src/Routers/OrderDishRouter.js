@@ -12,7 +12,7 @@ const OrderDishWebRouter = (app) => {
         .get(OrderDishController.GetListDishPaidInDate);
     router.route("/update-send-to-kitchen/:id")
         .put(OrderDishController.SendOrderToKitchen);
-    router.route("/dish-paid/:id")//id => iddatmon, body => idmon
+    router.route("/dish-paid/:id")//id => iddatmon, body => idmon, idcombo
         .put(OrderDishController.UpdateDishPaid);
     router.route("/:id")
         .get(OrderDishController.GetOrderDish)

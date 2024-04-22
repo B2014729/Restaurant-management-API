@@ -71,7 +71,11 @@ class OrderDishService {
 
             for (let i = 0; i < idDish.length; i++) {
                 let noteDishOrder = note[i] ? note[i] : null;
-                await connection.execute("INSERT INTO `chitietdatmon`(`iddatmon`, `idmon`, `trangthai`, `soluong`, `ghichu`,`idnhanvien`) VALUES (?,?,0,?,?,1)", [result[0].iddatmon, idDish[i], quantity[i], noteDishOrder]);
+                if (Number.isInteger(idDish[i])) {
+                    await connection.execute("INSERT INTO `chitietdatmon`(`iddatmon`, `idmon`, `idcombo`, `trangthai`, `soluong`, `ghichu`,`idnhanvien`) VALUES (?,?,?,?,?,?,?)", [result[0].iddatmon, idDish[i], 100, 0, quantity[i], noteDishOrder, idStaff]);
+                } else {
+                    await connection.execute("INSERT INTO `chitietdatmon`(`iddatmon`, `idmon`, `idcombo`, `trangthai`, `soluong`, `ghichu`,`idnhanvien`) VALUES (?,?,?,?,?,?,?)", [result[0].iddatmon, 100, idDish[i], 0, quantity[i], noteDishOrder, idStaff]);
+                }
             }
 
             let order = await new OrderDishService().FindOneById(result[0].iddatmon);
@@ -106,6 +110,21 @@ class OrderDishService {
     async UpdateStatusDish(idOrder, idDish, dateTime, idStaff) {// Cap nhat trang thai tra mon
         try {
             await connection.execute("UPDATE chitietdatmon SET trangthai = 1, tramon = ?, idnhanvien = ? WHERE iddatmon = ? AND idmon = ?;", [dateTime, idStaff, idOrder, idDish]);
+            let [result, resultDetail] = await new OrderDishService().FindOneById(idOrder);
+
+            if (!result) {
+                return [];
+            }
+            return result;
+        } catch (e) {
+            console.log(e);
+            return [];
+        }
+    }
+
+    async UpdateStatusCombo(idOrder, idCombo, dateTime, idStaff) {// Cap nhat trang thai tra mon
+        try {
+            await connection.execute("UPDATE chitietdatmon SET trangthai = 1, tramon = ?, idnhanvien = ? WHERE iddatmon = ? AND idcombo = ?;", [dateTime, idStaff, idOrder, idCombo]);
             let [result, resultDetail] = await new OrderDishService().FindOneById(idOrder);
 
             if (!result) {

@@ -1,6 +1,17 @@
 import connection from "../Configs/ConnectDB.js";
 
 class PromotionService {
+    async FindIdPromotionMax() {
+        try {
+            let [result, field] = await connection.execute("SELECT idkhuyenmai FROM combo_khuyenmai ORDER BY idkhuyenmai DESC LIMIT 1;");
+            if (result.length > 0)
+                return result[0].idkhuyenmai;
+        } catch (e) {
+            console.log(e);
+            return false;
+        }
+    }
+
     async FindOneById(id) { // Lay hoa don theo idhoadon
         try {
             let [result, field] = await connection.execute("SELECT * FROM combo_khuyenmai WHERE idkhuyenmai = ?", [id]);
@@ -102,7 +113,7 @@ class PromotionService {
         //     ],
         // }
         try {
-            let { name, image, dateStart, dateEnd, value } = newPromotion;
+            let { idPromotion, name, image, dateStart, dateEnd, value } = newPromotion;
             let status = 1; //Dang hoat dongt status = 1
 
             let { detailPromotion } = newPromotion;
@@ -110,7 +121,7 @@ class PromotionService {
                 let listDish = detailPromotion[0];
                 let listQuantity = detailPromotion[1];
 
-                await connection.execute("INSERT INTO `combo_khuyenmai`(`tenkhuyenmai`, `hinhanh`, `trangthai`, ngaybatdau, ngayketthuc, giatrikhuyenmai) VALUES (?,?,?,?,?,?)", [name, image, status, dateStart, dateEnd, value]);
+                await connection.execute("INSERT INTO `combo_khuyenmai`(`idkhuyenmai`,`tenkhuyenmai`, `hinhanh`, `trangthai`, ngaybatdau, ngayketthuc, giatrikhuyenmai) VALUES (?,?,?,?,?,?,?)", [idPromotion, name, image, status, dateStart, dateEnd, value]);
                 let [result, field] = await connection.execute("SELECT * FROM combo_khuyenmai ORDER BY idkhuyenmai DESC LIMIT 1;");
 
                 let [promotion, detailPromotionQuery] = await new PromotionService().FindOneById(result[0].idkhuyenmai);
@@ -156,6 +167,18 @@ class PromotionService {
         }
     }
 
+    async UploadBanner(idPromotion, image) {
+        try {
+            let [result, field] = await connection.execute("UPDATE combo_khuyenmai SET hinhanh = ? WHERE idkhuyenmai  = ?", [image, idPromotion]);
+            if (result.changedRows != 0) {
+                return [idPromotion];
+            }
+        } catch (error) {
+            console.log(error);
+            return [];
+        }
+    }
+
     // async Update(idBill) {
     //     try {
     //         let { name, address, phone, bank } = updateSupplier;
@@ -170,16 +193,13 @@ class PromotionService {
     //     }
     // }
 
-
-
     async Delete(idPromotion) {
         try {
-            let PromotionObject = new PromotionService();
-            await PromotionObject.DeleteDetailPromotion(idPromotion);
-            await connection.execute("DELETE FROM `combo_khuyenmai` WHERE idkhuyenmai = ?", [idPromotion])
-            let result = await PromotionObject.FindOneById(idPromotion);
+            //let PromotionObject = new PromotionService();
+            //await PromotionObject.DeleteDetailPromotion(idPromotion);
+            let result = await connection.execute("UPDATE combo_khuyenmai SET trangthai = 0 WHERE idkhuyenmai = ?", [idPromotion])
 
-            if (result.length === 0) {
+            if (result.changedRows !== 0) {
                 return idPromotion;
             }
         } catch (e) {

@@ -103,6 +103,8 @@ const NewBookings = async (req, res) => {
     try {
         let result = await BookingsService.Create(dataFormat);
         if (result.length > 0) {
+            // bookingSuccess
+            req.io.emit('bookingSuccess');
             return res.status(200).json(FormatResponseJson(200, "Create dish successful!", result));
         }
         return res.status(401).json(FormatResponseJson(401, "Create dish failed!", []));
@@ -143,6 +145,10 @@ const UpdateBookings = async (req, res) => {
 
 const ConfirmBooking = async (req, res) => {
     let idBookings = req.params.id;
+    let confirmBooking = req.body;
+    if (!confirmBooking.idTable || (confirmBooking.idTable < 10 || confirmBooking.idTable > 29)) {
+        return res.status(401).json(FormatResponseJson(401, "Invalid data, please check again!", []));
+    }
 
     if (!idBookings) {
         return res.status(404).json(FormatResponseJson(404, "Id is not empty!", []));
@@ -154,7 +160,7 @@ const ConfirmBooking = async (req, res) => {
     }
 
     try {
-        let result = await BookingsService.Confirm(idBookings);
+        let result = await BookingsService.Confirm(idBookings, confirmBooking.idTable, confirmBooking.status);
         if (!result || result.length === 0) {
             return res.status(401).json(FormatResponseJson(401, "Update bookings failed!", []));
         }
