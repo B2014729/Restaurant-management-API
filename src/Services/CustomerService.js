@@ -23,10 +23,12 @@ class CustomerService {
 
     async Create(customerNew) {
         try {
-            let { phone, username, password } = customerNew;
-            await connection.execute("INSERT INTO `khachhang`(`sodienthoai`, `tendangnhap`, `matkhau`) VALUES (?,?,?)", [phone, username, password])
+            let { name, phone, username, password } = customerNew;
+            name = name ? name : '';
+            await connection.execute("INSERT INTO `khachhang`(`hotenkhachhang`, `sodienthoai`, `tendangnhap`, `matkhau`) VALUES (?,?,?,?)", [name, phone, username, password])
             let [result, field] = await connection.execute("SELECT * FROM khachhang ORDER BY idkhachhang DESC LIMIT 1;");
             return result;
+
         } catch (e) {
             console.log(e);
             return [];

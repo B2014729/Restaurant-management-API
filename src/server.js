@@ -21,8 +21,13 @@ const StartServer = () => {
 
         io.on('connection', (socket) => {
             console.log("A client connected", socket.id);
-            // socket.emit('message', 'Co don moi kia');
+            socket.on('Fordisconnect', () => {
+                console.log('Disconnect', socket.id);
+                socket.disconnect();
+            });
         });
+
+
 
         app.use(function (req, res, next) {
             req.io = io;

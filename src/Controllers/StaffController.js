@@ -81,18 +81,15 @@ const GetStaffWithToken = async (req, res) => {
 const GetStaffList = async (req, res) => {
     try {
         let staffList = await StaffService.FindAll();
-
-        //Custom list data
+        staffList.shift();//Remove  nhan vien tam
         for (let index = 0; index < staffList.length; index++) {
             if (staffList[index].gioitinh == 0) {
                 staffList[index].gioitinhchu = 'Nữ';
             } else {
                 staffList[index].gioitinhchu = "Nam";
             }
-
             staffList[index].ngaysinh = moment(staffList[index].ngaysinh).format("YYYY-MM-DD");
         }
-
         return res.status(200).json(FormatResponseJson(200, "Successful", staffList));
     } catch (e) {
         console.log(e);
@@ -415,7 +412,7 @@ const SalaryTable = async (req, res) => {
 
     try {
         let staffList = await StaffService.FindAll();
-
+        staffList.shift();
         let calendrier = await CalendrierWorkStaffService.GetCalendrierWorkWithPlase(idPhase);
         if (!calendrier) {
             return res.status(400).json(FormatResponseJson(400, `Not found calendrier and phase`, []));

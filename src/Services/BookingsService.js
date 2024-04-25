@@ -13,6 +13,18 @@ class BookingsService {
         }
     }
 
+    async FindAllByIdTable(idTable) {
+        try {
+            let [result, field] = await connection.execute("SELECT * FROM datban WHERE idban = ?", [idTable]);
+            if (result.length > 0)
+                return result;
+            return [];
+        } catch (e) {
+            console.log(e);
+            return [];
+        }
+    }
+
     async FindAll() {
         try {
             let [result, field] = await connection.execute("SELECT * FROM datban ORDER BY ngaygio ASC");
@@ -27,10 +39,10 @@ class BookingsService {
 
     async Create(dishNew) {
         try {
-            let { idCustomer, quantityUser, dateTime, phone, name, note } = dishNew;
+            let { idCustomer, quantityUser, dateTime, phone, name, note, staff } = dishNew;
 
-            await connection.execute("INSERT INTO `datban`(`idkhachhang`, `soluongnguoi`, `ngaygio`, trangthai, ghichu) VALUES (?,?,?,0,?)", [idCustomer, quantityUser, dateTime, note]);
-            await connection.execute("UPDATE khachhang SET hotenkhachhang = ?, sodienthoai = ? WHERE idkhachhang = ?", [name, phone, idCustomer]);
+            await connection.execute("INSERT INTO `datban`(`idkhachhang`, `soluongnguoi`, `ngaygio`, trangthai, ghichu, idban, sodienthoai, idnhanvien) VALUES (?,?,?,0,?,1,?,?)", [idCustomer, quantityUser, dateTime, note, phone, staff]);
+            await connection.execute("UPDATE khachhang SET hotenkhachhang = ? WHERE idkhachhang = ?", [name, idCustomer]);
             let [result, field] = await connection.execute("SELECT * FROM datban ORDER BY iddatban DESC LIMIT 1;");
             return result;
         } catch (e) {

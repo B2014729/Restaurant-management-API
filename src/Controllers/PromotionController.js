@@ -50,6 +50,7 @@ const GetPromotionList = async (req, res) => {
         for (let index = 0; index < PromotionList.length; index++) {
             const element = PromotionList[index];
             let ListDish = element[1];
+
             let LishDishDetail = [];
             let totalPayment = 0;
             for (let i = 0; i < ListDish.length; i++) {

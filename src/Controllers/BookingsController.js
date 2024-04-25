@@ -49,6 +49,25 @@ const GetBookingsList = async (req, res) => {
     }
 }
 
+const GetBookingsWithTable = async (req, res) => {
+    let idTable = req.params.idTable;
+    try {
+        let bookingsList = await BookingsService.FindAllByIdTable(idTable);
+        if (bookingsList.length !== 0) {
+            for (let i = 0; i < bookingsList.length; i++) {
+                let customerInfo = await CustomerService.FindOneById(bookingsList[i].idkhachhang);
+                delete bookingsList[i].idkhachhang;
+                bookingsList[i].thongtinkhachhang = customerInfo[0];
+            }
+            return res.status(200).json(FormatResponseJson(200, "Successful", bookingsList));
+        }
+        return res.status(400).json(FormatResponseJson(400, "Dose not exist bookings", []));
+    } catch (e) {
+        console.log(e);
+        return res.status(500).json(FormatResponseJson(500, "Internal Server Error!", []));
+    }
+}
+
 const GetBookingsWithIdCustomer = async (req, res) => {
     let token = req.params.token;//id is id customer
     if (!token) {
@@ -87,21 +106,81 @@ const GetBookingsWithIdCustomer = async (req, res) => {
 
 const NewBookings = async (req, res) => {
     let bookingsNew = req.body;
-    if (!bookingsNew.token || !bookingsNew.quantity || !bookingsNew.date || !bookingsNew.time || !bookingsNew.phone) {
+    if (!bookingsNew.quantity || !bookingsNew.date || !bookingsNew.time || !bookingsNew.phone) {
         return res.status(401).json(FormatResponseJson(401, "Invalid data, please check again!", []));
     }
 
-    let dataFormat = {
-        idCustomer: JWT.getUserIdFromToken(bookingsNew.token),
-        dateTime: bookingsNew.date + " " + bookingsNew.time,
-        quantityUser: bookingsNew.quantity,
-        name: bookingsNew.name,
-        phone: bookingsNew.phone,
-        note: bookingsNew.note ? bookingsNew.note : '',
-    };
+    //Dat ban phai do khach hang tao => token != ''
+    //Hoac dat ban do nhan vien tao => staff != 1 (staff = token cua nhan vien);
+    if (!bookingsNew.token && (bookingsNew.staff == 1)) {
+        return res.status(401).json(FormatResponseJson(401, "Invalid token and staff, please check again!", []));
+    }
 
+    let dataFormat = {};
     try {
+        // Khach hang tu dat ban
+        if (bookingsNew.token != '' && bookingsNew.staff == 1) {
+            dataFormat = {
+                idCustomer: JWT.getUserIdFromToken(bookingsNew.token),
+                dateTime: bookingsNew.date + " " + bookingsNew.time,
+                quantityUser: bookingsNew.quantity,
+                name: bookingsNew.name,
+                phone: bookingsNew.phone,
+                note: bookingsNew.note ? bookingsNew.note : '',
+                staff: 1,
+            };
+        } else {
+            //Nhan vien tao dat ban =>check khach hang co trong he thong chua
+            if (bookingsNew.token == '' && bookingsNew.staff != 1) {
+                let listCustomer = await CustomerService.FindAll();
+                let issetCustomer = {};
+                listCustomer.forEach(element => {
+                    if (element.sodienthoai == bookingsNew.phone) {
+                        issetCustomer = element;
+                    }
+                });
+
+                //Khach hang da co trong he thong
+                if (Object.keys(issetCustomer).length != 0) {
+                    dataFormat = {
+                        idCustomer: issetCustomer.idkhachhang,
+                        dateTime: bookingsNew.date + " " + bookingsNew.time,
+                        quantityUser: bookingsNew.quantity,
+                        name: bookingsNew.name,
+                        phone: bookingsNew.phone,
+                        note: bookingsNew.note ? bookingsNew.note : '',
+                        staff: JWT.getUserIdFromToken(bookingsNew.staff),
+                    };
+                } else {
+                    //Khach hang chua co trong he thong  =>  Tao khach hang moi
+                    let username = bookingsNew.name.replace(' ', '');
+                    let customerNew = await CustomerService.Create({
+                        name: bookingsNew.name,
+                        phone: bookingsNew.phone,
+                        username: username,
+                        password: '123',
+                    });
+
+                    if (!customerNew || customerNew.length == 0) {
+                        return res.status(401).json(FormatResponseJson(401, "Create customer error!", []));
+                    }
+
+                    dataFormat = {
+                        idCustomer: customerNew[0].idkhachhang,
+                        dateTime: bookingsNew.date + " " + bookingsNew.time,
+                        quantityUser: bookingsNew.quantity,
+                        name: bookingsNew.name,
+                        phone: bookingsNew.phone,
+                        note: bookingsNew.note ? bookingsNew.note : '',
+                        staff: JWT.getUserIdFromToken(bookingsNew.staff),
+                    };
+                }
+            } else {
+                return res.status(401).json(FormatResponseJson(401, "Invalid data, please check again!", []));
+            }
+        }
         let result = await BookingsService.Create(dataFormat);
+
         if (result.length > 0) {
             // bookingSuccess
             req.io.emit('bookingSuccess');
@@ -164,6 +243,7 @@ const ConfirmBooking = async (req, res) => {
         if (!result || result.length === 0) {
             return res.status(401).json(FormatResponseJson(401, "Update bookings failed!", []));
         }
+        req.io.emit('bookingSuccess');
         return res.status(200).json(FormatResponseJson(200, "Updated bookings successful!", [result]));
 
     } catch (e) {
@@ -204,4 +284,5 @@ export {
     DeleteBookings,
     ConfirmBooking,
     GetBookingsWithIdCustomer,
+    GetBookingsWithTable,
 }

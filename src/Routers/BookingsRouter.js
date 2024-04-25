@@ -8,6 +8,8 @@ const BookingsWebRoute = (app) => {
 
     router.route("/list")
         .get(BookingsController.GetBookingsList);
+    router.route("/list-with-table/:idTable")
+        .get(BookingsController.GetBookingsWithTable);
     router.route("/list-with-customer/:token")
         .get(BookingsController.GetBookingsWithIdCustomer);
     router.route("/confirm/:id")
