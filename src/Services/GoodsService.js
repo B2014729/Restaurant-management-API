@@ -52,18 +52,18 @@ class GoodsService {
         }
     }
 
-    async UpdateDateManufacture(idGoods, date) {
-        try {
-            let [update, field] = await connection.execute("UPDATE `hanghoa` SET `ngaysanxuat`= ? WHERE idhanghoa = ?", [date, idGoods])
-            if (update.changedRows !== 0) {
-                let [result, field] = await new GoodsService().FindOneById(idGoods);
-                return result;
-            }
-        } catch (e) {
-            console.log(e);
-            return [];
-        }
-    }
+    // async UpdateDateManufacture(idGoods, date) {
+    //     try {
+    //         let [update, field] = await connection.execute("UPDATE `hanghoa` SET `ngaysanxuat`= ? WHERE idhanghoa = ?", [date, idGoods])
+    //         if (update.changedRows !== 0) {
+    //             let [result, field] = await new GoodsService().FindOneById(idGoods);
+    //             return result;
+    //         }
+    //     } catch (e) {
+    //         console.log(e);
+    //         return [];
+    //     }
+    // }
 
     async Delete(idGoods) {
         try {

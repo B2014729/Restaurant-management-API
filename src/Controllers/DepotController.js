@@ -1,6 +1,7 @@
 import DepotService from "../Services/DepotService.js";
 import FormatResponseJson from "../Services/FotmatResponse.js";
 import GoodsService from "../Services/GoodsService.js";
+import UnitService from "../Services/UnitService.js";
 
 const GetGoodsInDepot = async (req, res) => {
     let id = req.params.id;
@@ -17,9 +18,15 @@ const GetGoodsInDepot = async (req, res) => {
         if (goods.length <= 0) {
             return res.status(400).json(FormatResponseJson(400, `Not found goods id ${id}`, []));
         }
+
         let goodsDetail = await GoodsService.FindOneById(goods[0].idhanghoa);
-        goods[0].hanghoa = goodsDetail[0];
-        return res.status(200).json(FormatResponseJson(200, "Successful", goods));
+        let unit = await UnitService.FindOneById(goodsDetail[0].iddonvitinh);
+        goodsDetail[0].tendonvi = unit[0].tendonvi;
+        let dataFormat = {
+            hanghoa: goodsDetail[0],
+            chitiet: goods
+        }
+        return res.status(200).json(FormatResponseJson(200, "Successful", [dataFormat]));
     } catch (e) {
         console.log(e);
         return res.status(500).json(FormatResponseJson(500, "Internal Server Error", []));
@@ -27,16 +34,40 @@ const GetGoodsInDepot = async (req, res) => {
 }
 
 
-const GetDepot = async (req, res) => {
+const GetDepotList = async (req, res) => {
     try {
         let goodsList = await DepotService.FindAll();
+        let goodListAfterGroup = [];
         if (goodsList.length > 0) {
             for (let index = 0; index < goodsList.length; index++) {
-                let goodsDetail = await GoodsService.FindOneById(goodsList[index].idhanghoa);
-                goodsList[index].hanghoa = goodsDetail[0];
+                const elementcurrent = goodsList[index];
+                for (let j = index + 1; j < goodsList.length; j++) {
+                    const element = goodsList[j];
+
+                    if (elementcurrent.idhanghoa === element.idhanghoa) {
+                        goodsList[j] = { idhanghoa: 0 };
+                        elementcurrent.soluong += element.soluong;
+                        if ((new Date(elementcurrent.ngaynhap)) < (new Date(element.ngaynhap))) {
+                            elementcurrent.ngaynhap = element.ngaynhap;
+                        }
+                    }
+                }
+                if (elementcurrent.idhanghoa != 0) {
+                    goodListAfterGroup.push(elementcurrent);
+                }
+            }
+            //console.log(goodListAfterGroup);
+
+            for (let index = 0; index < goodListAfterGroup.length; index++) {
+                let goodsDetail = await GoodsService.FindOneById(goodListAfterGroup[index].idhanghoa);
+                if (goodsDetail.length > 0) {
+                    let unit = await UnitService.FindOneById(goodsDetail[0].iddonvitinh);
+                    goodsDetail[0].tendonvi = unit[0].tendonvi;
+                }
+                goodListAfterGroup[index].hanghoa = goodsDetail[0];
             }
         }
-        return res.status(200).json(FormatResponseJson(200, "Successful", goodsList));
+        return res.status(200).json(FormatResponseJson(200, "Successful", goodListAfterGroup));
     } catch (e) {
         console.log(e);
         return res.status(500).json(FormatResponseJson(500, "Internal Server Error!", []));
@@ -107,7 +138,7 @@ const Update = async (req, res) => {
 
 export {
     GetGoodsInDepot,
-    GetDepot,
+    GetDepotList,
     Update,
     DeleteGoodsInDepot,
     AddGoodsInDepot,

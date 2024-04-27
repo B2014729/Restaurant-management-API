@@ -14,7 +14,7 @@ class DepotService {
 
     async FindAll() {
         try {
-            let [result, field] = await connection.execute("SELECT * FROM kho");
+            let [result, field] = await connection.execute("SELECT * FROM kho ");
             return result;
         } catch (e) {
             console.log(e);
@@ -24,15 +24,15 @@ class DepotService {
 
     async Create(goodsNew) {
         try {
-            let { idGoods, quantity, date } = goodsNew;
-            let goodsIsDepot = await new DepotService().FindOneById(idGoods);
-
+            let { idGoods, quantity, dateImport, dateManufacture } = goodsNew;
+            let [goodsIsDepot, field] = await connection.execute("SELECT * FROM `kho` WHERE idhanghoa = ? AND ngaysanxuat = ?", [idGoods, dateManufacture]);
+            // console.log(goodsIsDepot);
             if (goodsIsDepot.length > 0) {
-                await connection.execute("UPDATE `kho` SET `soluong` = ?, `ngaynhap` = ?", [(goodsIsDepot[0].soluong + quantity), date]);
+                await connection.execute("UPDATE `kho` SET `soluong` = ?, `ngaynhap` = ? WHERE idhanghoa = ?", [(goodsIsDepot[0].soluong + quantity), dateImport, idGoods]);
             } else {
-                await connection.execute("INSERT INTO `kho`(`idhanghoa`, `soluong`, `ngaynhap`) VALUES (?,?,?)", [idGoods, quantity, date])
+                await connection.execute("INSERT INTO `kho`(`idhanghoa`, `soluong`, `ngaynhap`, `ngaysanxuat`) VALUES (?,?,?,?)", [idGoods, quantity, dateImport, dateManufacture])
             }
-            let [result, field] = await connection.execute("SELECT * FROM kho WHERE idhanghoa = ?", [idGoods]);
+            let [result, fieldResult] = await connection.execute("SELECT * FROM kho WHERE idhanghoa = ?", [idGoods]);
             return result;
         } catch (e) {
             console.log(e);

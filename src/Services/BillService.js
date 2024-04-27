@@ -59,7 +59,7 @@ class BillService {
     async FindAll() { // lay tat ca cac hoa don
         try {
             let result = [];
-            let [resultQuery, field] = await connection.execute("SELECT idhoadon FROM hoadon");
+            let [resultQuery, field] = await connection.execute("SELECT idhoadon FROM hoadon ORDER BY ngaygioxuat DESC");
             for (let i = 0; i < resultQuery.length; i++) {
                 let resultBill = await new BillService().FindOneById(resultQuery[i].idhoadon);
                 result[i] = resultBill;

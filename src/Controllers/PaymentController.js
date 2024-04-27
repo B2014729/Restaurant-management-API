@@ -65,6 +65,7 @@ const GetPayment = async (req, res) => {
 const GetPaymentList = async (req, res) => {
     try {
         let paymentList = await PaymentService.FindAll();
+
         if (paymentList.length <= 0) {
             return res.status(400).json(FormatResponseJson(400, `Not found payment list`, []));
         }
@@ -163,10 +164,11 @@ const NewPayment = async (req, res) => {
             goodsNew = {
                 idGoods: paymentNew.idGoods[index],
                 quantity: paymentNew.quantity[index],
-                date: paymentNew.time,
+                dateImport: paymentNew.time,
+                dateManufacture: paymentNew.dates[index],//Ngay san xuat
             }
             await DepotService.Create(goodsNew);
-            await GoodsService.UpdateDateManufacture(paymentNew.idGoods[index], paymentNew.dates[index],)
+            // await GoodsService.UpdateDateManufacture(paymentNew.idGoods[index], paymentNew.dates[index],)
         }
 
         if (result.length > 0) {
@@ -237,11 +239,72 @@ const DeletePayment = async (req, res) => {
     }
 }
 
+const GetListWithTime = async (req, res) => {
+    let { start, end } = req.params;
+
+    if (!start || !end) {
+        return res.status(401).json(FormatResponseJson(401, "Invalid data, please check again!", []));
+    }
+
+    try {
+        let paymentList = await PaymentService.FindAllWhereTime(start, end);
+
+        if (paymentList.length <= 0) {
+            return res.status(400).json(FormatResponseJson(400, `Not found bill list`, []));
+        }
+
+        let resultPaymentList = [];
+
+        for (let i = 0; i < paymentList.length; i++) {
+            let amount = 0;
+            let payment = paymentList[i][0][0];
+            let paymentDetail = paymentList[i][1];
+
+            let resultStaff = await StaffService.FindOneById(payment.idnhanvien);
+            let resultSupplier = await SupplierService.FindOneById(payment.idnhacungcap);
+            let resultDetail = [];
+
+            for (let i = 0; i < paymentDetail.length; i++) {
+                let result = await GoodsService.FindOneById(paymentDetail[i].idhanghoa);
+                amount += (paymentDetail[i].soluong * paymentDetail[i].dongia);
+
+                let unit = await UnitService.FindOneById(result[0].iddonvitinh);
+
+                result[0].donvitinh = unit.tendonvi;
+                resultDetail[i] = {
+                    hanghoa: result[0],
+                    soluong: paymentDetail[i].soluong,
+                    dongia: paymentDetail[i].dongia,
+                    giam: 0,
+                }
+            }
+
+            resultPaymentList.push({
+                idphieuchi: payment.idphieuchi,
+                nhanvien: resultStaff[0],
+                nhacungcap: resultSupplier[0],
+                ngaygio: payment.ngaygio,
+                thanhtoan: amount,
+                thongtinchitiet: resultDetail,
+            });
+        }
+
+        return res.status(200).json(FormatResponseJson(200, "Successful", resultPaymentList));
+
+    } catch (error) {
+        console.log(e);
+        return res.status(500).json(FormatResponseJson(500, "Internal Server Error!", []));
+    }
+
+}
+
+
 export {
     GetPayment,
     GetPaymentList,
     NewPayment,
     UpdatePayment,
     DeletePayment,
-    StatisticalPaymentInMonth
+    StatisticalPaymentInMonth,
+    GetListWithTime
 }

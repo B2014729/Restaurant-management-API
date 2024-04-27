@@ -88,6 +88,23 @@ class PaymentService {
             return 0;
         }
     }
+
+    async FindAllWhereTime(start, end) { // Lay cac hoa don trong giai doan start => end
+        start = new Date(start);
+        end = new Date(end);
+        try {
+            let result = [];
+            let [resultQuery, field] = await connection.execute("SELECT idphieuchi FROM phieuchi WHERE ngaygio >= ? AND ngaygio <= ?", [start, end]);
+            for (let i = 0; i < resultQuery.length; i++) {
+                let resultPayment = await new PaymentService().FindOneById(resultQuery[i].idphieuchi);
+                result[i] = resultPayment;
+            }
+            return result;
+        } catch (e) {
+            console.log(e);
+            return [];
+        }
+    }
 }
 
 export default new PaymentService();

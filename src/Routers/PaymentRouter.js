@@ -8,6 +8,8 @@ const PaymentWebRouter = (app) => {
         .get(PaymentController.GetPaymentList);
     router.route("/statistical/:year")
         .get(PaymentController.StatisticalPaymentInMonth);
+    router.route("/list-in-time/:start&:end")
+        .get(PaymentController.GetListWithTime);
     router.route("/:id")
         .get(PaymentController.GetPayment)
         .put(PaymentController.UpdatePayment)

@@ -6,7 +6,7 @@ const router = express.Router();
 
 const DepotWebRoute = (app) => {
     router.route("/list")
-        .get(DepotController.GetDepot);
+        .get(DepotController.GetDepotList);
     router.route("/update")
         .put(DepotController.Update);
     router.route("/:id")
