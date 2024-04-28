@@ -132,7 +132,34 @@ const Update = async (req, res) => {
         }
         return res.status(200).json(FormatResponseJson(200, "Updated payment successful!", []));
     } catch (error) {
-        console.log(error);
+        console.log(e);
+        return res.status(500).json(FormatResponseJson(500, "Internal Server Error", []));
+    }
+}
+
+const UpdateGoodsInDepot = async (req, res) => {
+    let { listGoods } = req.body;
+
+    if (!listGoods) {
+        return res.status(401).json(FormatResponseJson(401, "Invalid data, please check again!", []));
+    }
+
+    try {
+        for (let index = 0; index < listGoods.length; index++) {
+            const element = listGoods[index];
+            let goodsInforUpdate = {
+                idGoods: element.idhanghoa,
+                quantity: element.soluong,
+                dateImport: element.ngaynhap,
+                dateManufacture: element.ngaysanxuat,
+            }
+
+            let result = await DepotService.UpdateInforGoods(goodsInforUpdate);
+        }
+        return res.status(200).json(FormatResponseJson(200, "Updated payment successful!", []));
+    } catch (error) {
+        console.log(e);
+        return res.status(500).json(FormatResponseJson(500, "Internal Server Error", []));
     }
 }
 
@@ -140,6 +167,7 @@ export {
     GetGoodsInDepot,
     GetDepotList,
     Update,
+    UpdateGoodsInDepot,
     DeleteGoodsInDepot,
     AddGoodsInDepot,
 }

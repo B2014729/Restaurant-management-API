@@ -9,6 +9,8 @@ const DepotWebRoute = (app) => {
         .get(DepotController.GetDepotList);
     router.route("/update")
         .put(DepotController.Update);
+    router.route("/update-goods")
+        .put(DepotController.UpdateGoodsInDepot);
     router.route("/:id")
         .get(DepotController.GetGoodsInDepot)
         .delete(DepotController.DeleteGoodsInDepot);

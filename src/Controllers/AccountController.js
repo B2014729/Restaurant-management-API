@@ -43,7 +43,7 @@ const Login = async (req, res) => {
                 res.setHeader("Authorization", token);
                 return res.status(200).json(FormatResponseJson(200, "Login successful!", [{
                     tendangnhap: accountCustomer[0].tendangnhap,
-                    quyen: 10,//Quyen danh dau khach hang
+                    quyen: 10,//Quyen danh dau quyen khach hang
                 }]));
             } else {
                 return res.status(401).json(FormatResponseJson(401, "Login failed!", []));
@@ -95,6 +95,7 @@ const UpdateAcountInfor = async (req, res) => {
         let updateAccount = {
             username: username,
             password: password,
+            role: account[0].quyen,
         }
         let accountUpdated = await AccountService.Update(idAccount, updateAccount);
         if (accountUpdated.length === 0) {

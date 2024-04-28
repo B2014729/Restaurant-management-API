@@ -61,7 +61,7 @@ class CalendriedWorkStaffService {
 
     async GetAllPhase() { //Lay tat ca cac giai doan hien  co
         try {
-            let [result, field] = await connection.execute("SELECT * FROM giaidoan");
+            let [result, field] = await connection.execute("SELECT * FROM giaidoan ORDER BY idgiaidoan DESC");
             if (result.length > 0) {
                 return result;
             }

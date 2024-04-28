@@ -64,6 +64,20 @@ class DepotService {
             console.log(error);
         }
     }
+
+    async UpdateInforGoods(goodInfor) {
+        let { idGoods, quantity, dateImport, dateManufacture } = goodInfor;
+        dateManufacture = new Date(dateManufacture);
+        try {
+            let [update, field] = await connection.execute("UPDATE `kho` SET  soluong = ? WHERE idhanghoa = ? AND ngaysanxuat = ?", [quantity, idGoods, dateManufacture]);
+            if (update.changedRows !== 0) {
+                let [result, field] = await new DepotService().FindOneById(idGoods);
+                return result;
+            }
+        } catch (error) {
+            console.log(error);
+        }
+    }
 }
 
 export default new DepotService();
