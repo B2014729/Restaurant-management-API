@@ -4,6 +4,7 @@ import OrderDishService from "../Services/OrderDishService.js";
 import DishService from "../Services/DishService.js";
 import TableService from "../Services/TableService.js";
 import PromotionService from "../Services/PromotionService.js";
+import * as JWT from "../Services/JWTService.js";
 
 import FormatResponseJson from "../Services/FotmatResponse.js";
 
@@ -724,7 +725,7 @@ const GetListBillInDate = async (req, res) => {
 const NewBill = async (req, res) => {
     let billNew = req.body;
     //console.log(paymentNew.idStaff, paymentNew.idSupplier, paymentNew.time, paymentNew.idGoods, paymentNew.quantity, paymentNew.price);
-    if (!billNew.idStaff || !billNew.idTable || !billNew.timeCreate) {
+    if (!billNew.idTable || !billNew.timeCreate) {
         return res.status(401).json(FormatResponseJson(401, "Invalid data, please check again!", []));
     }
 
@@ -742,7 +743,7 @@ const NewBill = async (req, res) => {
 
 const UpdateStatusBill = async (req, res) => { // Khi xuat hoa don thanh toan theo id ban
     let idTable = req.params.idtable;
-    let { idStaff } = req.body;
+    let { token } = req.body;
     let timePrint = new Date();
     // if (!timePrint) {
     //     return res.status(401).json(FormatResponseJson(401, "Invalid data, please check again!", []));
@@ -758,6 +759,7 @@ const UpdateStatusBill = async (req, res) => { // Khi xuat hoa don thanh toan th
     }
 
     try {
+        let idStaff = JWT.getUserIdFromToken(token);
         let resultIdWithTable = await BillService.FindOneByIdTableNew(idTable);
         if (resultIdWithTable.length != 0) {
             let result = await BillService.UpdateStatus(resultIdWithTable[0].idhoadon, idStaff, timePrint);

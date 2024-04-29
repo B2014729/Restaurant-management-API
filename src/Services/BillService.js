@@ -152,8 +152,8 @@ class BillService {
 
     async Create(newBill) {  // Tao mot hoa don moi
         try {
-            let { idStaff, idTable, timeCreate } = newBill;
-            await connection.execute("INSERT INTO `hoadon`(`idnhanvien`, `idban`, `ngaygiotao`, ngaygioxuat, trangthai) VALUES (?,?,?,NULL,0)", [idStaff, idTable, timeCreate]);
+            let { idTable, timeCreate } = newBill;
+            await connection.execute("INSERT INTO `hoadon`(`idnhanvien`, `idban`, `ngaygiotao`, ngaygioxuat, trangthai) VALUES (?,?,?,NULL,0)", [1, idTable, timeCreate]);
 
             let [result, field] = await connection.execute("SELECT * FROM hoadon ORDER BY idhoadon DESC LIMIT 1;");
 
@@ -165,7 +165,7 @@ class BillService {
         }
     }
 
-    async UpdateStatus(idBill, idStaff, timePrint) { // Cap nhat trang thai hoa don khi thanh toan => trangthai =1, ngaygioxuat != null
+    async UpdateStatus(idBill, idStaff, timePrint) { // Cap nhat trang thai hoa don khi thanh toan => trangthai =1, ngaygioxuat != null, idnhanvien= nhanvienthanhtoan
         try {
             let [update, field] = await connection.execute("UPDATE hoadon SET trangthai = 1, ngaygioxuat = ?, idnhanvien = ? WHERE idhoadon = ?", [timePrint, idStaff, idBill]);
             if (update.changedRows !== 0) {
