@@ -1,7 +1,6 @@
 import FormatResponseJson from "../Services/FotmatResponse.js";
 import EvaluateService from "../Services/EvaluateService.js";
 import * as JWT from '../Services/JWTService.js';
-import e from "cors";
 
 const GetEvaluate = async (req, res) => {
     let id = req.params.id;
@@ -27,6 +26,31 @@ const GetEvaluate = async (req, res) => {
 }
 
 
+const GetEvaluateListOfCustomer = async (req, res) => {
+    let idcustomer = req.params.idCustomer;
+    if (!idcustomer) {
+        return res.status(404).json(FormatResponseJson(404, "Id customer is not empty!", []));
+    } else {
+        idcustomer = Number(idcustomer);
+        if (isNaN(idcustomer)) {
+            return res.status(404).json(FormatResponseJson(404, "Id customer is not Number", []));
+        }
+    }
+
+    try {
+        let evaluateList = await EvaluateService.FindAllOfCustomer(idcustomer);
+        if (evaluateList.length > 0) {
+            evaluateList.forEach(element => {
+                delete element.matkhau;
+            });
+        }
+        return res.status(200).json(FormatResponseJson(200, "Successful", evaluateList));
+    } catch (e) {
+        console.log(e);
+        return res.status(500).json(FormatResponseJson(500, "Internal Server Error!", []));
+    }
+}
+
 const GetEvaluateList = async (req, res) => {
     try {
         let evaluateList = await EvaluateService.FindAll();
@@ -41,6 +65,7 @@ const GetEvaluateList = async (req, res) => {
         return res.status(500).json(FormatResponseJson(500, "Internal Server Error!", []));
     }
 }
+
 
 const NewEvaluate = async (req, res) => {
     let evaluateNew = req.body;
@@ -119,6 +144,7 @@ const DeleteEvaluate = async (req, res) => {
 export {
     GetEvaluate,
     GetEvaluateList,
+    GetEvaluateListOfCustomer,
     NewEvaluate,
     UpdateEvaluate,
     DeleteEvaluate

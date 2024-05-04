@@ -8,6 +8,8 @@ const EvaluateWebRouter = (app) => {
 
     router.route("/list")
         .get(EvaluateController.GetEvaluateList);
+    router.route("/list-customer/:idCustomer")
+        .get(EvaluateController.GetEvaluateListOfCustomer);
     router.route("/:id")
         .get(EvaluateController.GetEvaluate)
         .put(EvaluateController.UpdateEvaluate)

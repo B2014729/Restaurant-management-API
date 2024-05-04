@@ -44,7 +44,7 @@ class DishService {
     async Create(dishNew) {
         try {
             let { name, price, imageUrl, unit, type } = dishNew;
-            await connection.execute("INSERT INTO `mon`(`tenmon`, `gia`, `hinhanh`, iddonvitinh, idloai, trangthai) VALUES (?,?,?,?,?, 1)", [name, price, '', unit, type])
+            await connection.execute("INSERT INTO `mon`(`tenmon`, `gia`, `hinhanh`, iddonvitinh, idloai, trangthai) VALUES (?,?,?,?,?, 1)", [name, price, imageUrl, unit, type])
             let [result, field] = await connection.execute("SELECT * FROM mon ORDER BY idmon DESC LIMIT 1;");
             return result;
         } catch (e) {

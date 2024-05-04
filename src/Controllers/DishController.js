@@ -70,6 +70,14 @@ const NewDish = async (req, res) => {
     if (!dishNew.name || !dishNew.price || !dishNew.unit || !dishNew.type) {
         return res.status(401).json(FormatResponseJson(401, "Invalid data, please check again!", []));
     }
+    dishNew.imageUrl = '';
+    if (req.hasOwnProperty('file')) {
+        if (req.file.hasOwnProperty('filename')) {
+            dishNew.imageUrl = 'http://localhost:8000/images/' + req.file.filename;
+        }
+    } else {
+        dishNew.imageUrl = '';
+    }
 
     try {
         let result = await DishService.Create(dishNew);

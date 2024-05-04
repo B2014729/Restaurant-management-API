@@ -25,6 +25,18 @@ class EvaluateService {
         }
     }
 
+
+    async FindAllOfCustomer(idcustomer) {
+        try {
+            let [result, field] = await connection.execute("SELECT * FROM danhgia LEFT JOIN khachhang ON danhgia.idkhachhang = khachhang.idkhachhang WHERE danhgia.idkhachhang = ?", [idcustomer]);
+            if (result.length > 0)
+                return result;
+            return [];
+        } catch (e) {
+            console.log(e);
+            return [];
+        }
+    }
     async Create(data) {
         let { idkhachhang, sosao, noidung, thoigian } = data;
         try {

@@ -7,7 +7,7 @@ import * as JWT from '../Services/JWTService.js';
 const GetAllPhase = async (req, res) => {
     try {
         let phase = await CalendrierWorkStaffService.GetAllPhase();
-        if (phase.length <= 0) {
+        if (!phase || phase.length <= 0) {
             return res.status(400).json(FormatResponseJson(400, `Not found`, []));
         }
         return res.status(200).json(FormatResponseJson(200, "Successful", phase));

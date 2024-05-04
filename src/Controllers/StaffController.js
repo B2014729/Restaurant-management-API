@@ -6,6 +6,18 @@ import CalendrierWorkStaffService from "../Services/CalendrierWorkStaffService.j
 import * as JWT from "../Services/JWTService.js";
 
 const GetStaff = async (req, res) => {
+    // let idcalendrier = 26;
+    // for (let index = idcalendrier; index <= 45; index++) {
+    //     for (let idnhanvien = 2; idnhanvien <= 11; idnhanvien++) {
+    //         let idCalam = [];
+    //         for (let i = 0; i <= 6; i++) {
+    //             idCalam.push(Math.floor(Math.random() * (6 - 1 + 1) + 1));
+    //         }
+    //         let data = `INSERT INTO \`quan-li-nha-hang\`.\`dangkilamviec\` (\`idlichlamviec\`, \`idnhanvien\`, \`ngay1\`, \`ngay2\`, \`ngay3\`, \`ngay4\`, \`ngay5\`, \`ngay6\`, \`ngay7\`) VALUES ('${index}', '${idnhanvien}', '${idCalam[0]}', '${idCalam[1]}', '${idCalam[2]}', '${idCalam[3]}', '${idCalam[4]}', '${idCalam[5]}', '${idCalam[6]}');`
+    //         console.log(data);
+    //     }
+    // }
+
     let id = req.params.id;
     if (!id) {
         return res.status(404).json(FormatResponseJson(404, "Id is not empty!", []));
