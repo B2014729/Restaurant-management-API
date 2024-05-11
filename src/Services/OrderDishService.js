@@ -1,4 +1,6 @@
 import connection from "../Configs/ConnectDB.js";
+import DishService from "./DishService.js";
+import PromotionService from "./PromotionService.js";
 
 class OrderDishService {
 
@@ -71,10 +73,15 @@ class OrderDishService {
 
             for (let i = 0; i < idDish.length; i++) {
                 let noteDishOrder = note[i] ? note[i] : null;
+                let price = 0;
                 if (Number.isInteger(idDish[i])) {
-                    await connection.execute("INSERT INTO `chitietdatmon`(`iddatmon`, `idmon`, `idcombo`, `trangthai`, `soluong`, `ghichu`,`idnhanvien`) VALUES (?,?,?,?,?,?,?)", [result[0].iddatmon, idDish[i], 100, 0, quantity[i], noteDishOrder, idStaff]);
+                    let dish = await DishService.FindOneById(idDish[i]);
+                    price = dish[0].gia;
+                    await connection.execute("INSERT INTO `chitietdatmon`(`iddatmon`, `idmon`, `idcombo`, `trangthai`, `soluong`, `ghichu`,`idnhanvien`, `gia`) VALUES (?,?,?,?,?,?,?,?)", [result[0].iddatmon, idDish[i], 100, 0, quantity[i], noteDishOrder, idStaff, price]);
                 } else {
-                    await connection.execute("INSERT INTO `chitietdatmon`(`iddatmon`, `idmon`, `idcombo`, `trangthai`, `soluong`, `ghichu`,`idnhanvien`) VALUES (?,?,?,?,?,?,?)", [result[0].iddatmon, 100, idDish[i], 0, quantity[i], noteDishOrder, idStaff]);
+                    let [promotion, detailPromotion] = await PromotionService.FindOneById(idDish[i]);
+                    price = promotion[0].gia;
+                    await connection.execute("INSERT INTO `chitietdatmon`(`iddatmon`, `idmon`, `idcombo`, `trangthai`, `soluong`, `ghichu`,`idnhanvien`, `gia`) VALUES (?,?,?,?,?,?,?,?)", [result[0].iddatmon, 100, idDish[i], 0, quantity[i], noteDishOrder, idStaff, price]);
                 }
             }
 

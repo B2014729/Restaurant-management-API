@@ -5,7 +5,6 @@ import * as TableController from "../Controllers/TableController.js";
 const router = express.Router();
 
 const TableWebRouter = (app) => {
-
     router.route("/list")
         .get(TableController.GetTableList);
     router.route("/:id")

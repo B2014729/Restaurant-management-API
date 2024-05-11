@@ -13,7 +13,7 @@ class DishService {
 
     async FindOneById(id) {
         try {
-            let [result, field] = await connection.execute("SELECT * FROM mon  LEFT JOIN loai ON mon.idloai  = loai.idloai WHERE idmon = ?", [id]);
+            let [result, field] = await connection.execute("SELECT * FROM mon  LEFT JOIN loai ON mon.idloai = loai.idloai WHERE idmon = ?", [id]);
             return result;
         } catch (e) {
             console.log(e);

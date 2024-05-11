@@ -167,7 +167,6 @@ const NewOrderDish = async (req, res) => {
 
     const now = new Date();
     orderNew.dateTime = `${now.getFullYear()}-${now.getMonth() + 1}-${now.getDate()} ${now.getHours()}:${now.getMinutes()}`;
-
     if (!orderNew.token || !orderNew.idTable || (orderNew.status === undefined) || (orderNew.idDish.length === 0) || (orderNew.quantity.length === 0)) {
         return res.status(401).json(FormatResponseJson(401, "Invalid data, please check again!", []));
     }
@@ -177,6 +176,8 @@ const NewOrderDish = async (req, res) => {
 
     try {
         orderNew.idStaff = JWT.getUserIdFromToken(orderNew.token) || 3;
+
+
         let result = await OrderDishService.Create(orderNew);
 
         if (result.length > 0) {

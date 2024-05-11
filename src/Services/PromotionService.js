@@ -1,4 +1,5 @@
 import connection from "../Configs/ConnectDB.js";
+import DishService from "./DishService.js";
 
 class PromotionService {
     async FindIdPromotionMax() {
@@ -16,6 +17,16 @@ class PromotionService {
         try {
             let [result, field] = await connection.execute("SELECT * FROM combo_khuyenmai WHERE idkhuyenmai = ?", [id]);
             let [resultDetail, fieldDetail] = await connection.execute("SELECT * FROM chitietkhuyenmai WHERE idkhuyenmai = ?", [id]);
+            let paySum = 0;
+            if (resultDetail.length > 0) {
+                for (let index = 0; index < resultDetail.length; index++) {
+                    const element = resultDetail[index];
+                    let dish = await DishService.FindOneById(element.idmon);
+                    paySum += dish[0].gia * element.soluong;
+                }
+            }
+            result[0].gia = paySum - (paySum * result[0].giatrikhuyenmai / 100);
+
             if (result.length === 1) {
                 return [result, resultDetail];
             } else {
