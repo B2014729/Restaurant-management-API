@@ -12,9 +12,10 @@ class DatasetRevueneService {
     }
 
     async Create(dataRow) {
-        let { month, quantityDate, eventDate, quantitySunday, discount, advertisement, weather, revenue } = dataRow;
+        let { month, quantityDay, numHolidays, quantitySunDay, discount, advertisement, weather, revenue, quantity } = dataRow;
+        // console.log(month, quantityDay, numHolidays, quantitySunDay, discount, advertisement, weather, revenue, quantity);
         try {
-            await connection.execute("INSERT INTO `dataset_revenue`(`thang`, `songay`, `songayle`, `songayCN`, `giamgia`, `chiphiquangcao`, `thoitiet`, `doanhthu`) VALUES (?,?,?,?,?,?,?,?)", [month, quantityDate, eventDate, quantitySunday, discount, advertisement, weather, revenue]);
+            await connection.execute("INSERT INTO `dataset_revenue`(`thang`, `songay`, `songayle`, `songayCN`, `giamgia`, `chiphiquangcao`, `thoitiet`, `doanhthu`, `songaykhuyenmai`) VALUES (?,?,?,?,?,?,?,?,?)", [month, quantityDay, numHolidays, quantitySunDay, discount, advertisement, weather, revenue, quantity]);
             let [dataAdd, field] = await connection.execute("SELECT * FROM dataset_revenue ORDER BY stt DESC LIMIT 1;");
             if (dataAdd.length > 0) {
                 return dataAdd;

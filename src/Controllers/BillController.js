@@ -200,6 +200,7 @@ const GetBillEating = async (req, res) => {//List  bill => Danh  hoa don dang co
 
 const GetBillWithIdTable = async (req, res) => {// Lay thong tin cua ban dang an (=> chua thanh toan)
     let id = req.params.idtable;
+    // console.log(id);
     if (!id) {
         return res.status(404).json(FormatResponseJson(404, "Id is not empty!", []));
     } else {
@@ -210,14 +211,14 @@ const GetBillWithIdTable = async (req, res) => {// Lay thong tin cua ban dang an
     }
     try {
         let billWithIdTable = await BillService.FindOneByIdTableNew(id);
-
+        // console.log(billWithIdTable);
         if (billWithIdTable.length === 0) {
-            return res.status(400).json(FormatResponseJson(400, `Not found payment id ${id}`, []));
+            return res.status(400).json(FormatResponseJson(400, `Not found table eating id ${id}`, []));
         }
 
         let [bill, billDetail] = await BillService.FindOneById(billWithIdTable[0].idhoadon);
         if (!bill || bill.length <= 0) {
-            return res.status(400).json(FormatResponseJson(400, `Not found payment id ${id}`, []));
+            return res.status(400).json(FormatResponseJson(400, `Not found table eating id ${id}`, []));
         }
 
         let resultStaff = await StaffService.FindOneById(bill[0].idnhanvien);
@@ -233,6 +234,7 @@ const GetBillWithIdTable = async (req, res) => {// Lay thong tin cua ban dang an
                 let element = detailOrder[index];
 
                 payment += element.gia * element.soluong;
+                element.giodat = order[0].thoidiemdat;
 
                 let resultDetailBill = {};
                 if (element.idmon != 100) {
@@ -273,6 +275,7 @@ const GetBillWithIdTable = async (req, res) => {// Lay thong tin cua ban dang an
                 }
                 delete element.idcombo;
                 delete element.idmon;
+
                 resultDetailBill = element;
                 resultDetailOrder.push(resultDetailBill);
             }

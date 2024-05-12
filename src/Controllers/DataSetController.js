@@ -1,22 +1,22 @@
 import dataset_revuene from "../Services/dataset_revuene.js";
+import FormatResponseJson from "../Services/FotmatResponse.js";
 
-// const get_day_in_month = (year, month) => {
-//     return new Date(year, month, 0).getDate();
-// }
+const get_day_in_month = (year, month) => {
+    return new Date(year, month, 0).getDate();
+}
 
-// const get_Sunday_in_month = (year, month) => {
-//     let daysInMonth = get_day_in_month(year, month);
+const get_Sunday_in_month = (year, month) => {
+    let daysInMonth = get_day_in_month(year, month);
 
-//     let numHolidays = 0;
-//     for (let i = 1; i <= daysInMonth; i++) {
-//         let dayOfWeek = new Date(year, month - 1, i).getDay();
-//         if (dayOfWeek === 6) {
-//             numHolidays++;
-//         }
-//     }
-
-//     return numHolidays;
-// }
+    let numHolidays = 0;
+    for (let i = 1; i <= daysInMonth; i++) {
+        let dayOfWeek = new Date(year, month - 1, i).getDay();
+        if (dayOfWeek === 6) {
+            numHolidays++;
+        }
+    }
+    return numHolidays;
+}
 
 // const get_event_in_month = (month) => {
 //     switch (month) {
@@ -127,33 +127,30 @@ const GetAll = async (req, res) => {
     return res.send('Hello world');
 }
 
-// const CreateDataSet = async (req, res) => {
-//     for (let year = 2014; year < 2023; year++) {
-//         for (let month = 1; month <= 12; month++) {
-//             let quantityDate = get_day_in_month(year, month);
-//             let { eventDate, weather } = get_event_in_month(month);
-//             let quantitySunday = get_Sunday_in_month(year, month);
-//             let discount = get_discount();
-//             let advertisement = get_advertisement();
-//             let revenue = get_revenue((eventDate + quantityDate), advertisement, weather);
+const CreateDataSet = async (req, res) => {
+    let dataAdd = req.body;
 
-//             let data = {
-//                 month: month,
-//                 quantityDate: quantityDate,
-//                 eventDate: eventDate,
-//                 weather: weather,
-//                 quantitySunday: quantitySunday,
-//                 advertisement: advertisement,
-//                 discount: discount,
-//                 revenue: revenue,
-//             }
-//             let result = await dataset_revuene.Create(data);
-//         }
-//     }
-// }
+    if (!dataAdd.month || !dataAdd.numHolidays || !dataAdd.weather || !dataAdd.discount || !dataAdd.advertisement
+        || !dataAdd.quantity || !dataAdd.revenue) {
+        return res.status(401).json(FormatResponseJson(401, "Invalid data, please check again!", []));
+    }
+    dataAdd.quantityDay = get_day_in_month((new Date()).getFullYear(), dataAdd.month);
+    dataAdd.quantitySunDay = get_Sunday_in_month((new Date()).getFullYear(), dataAdd.month);
 
+    try {
+        let result = await dataset_revuene.Create(dataAdd);
+        // console.log(result);
+        if (result.length > 0) {
+            return res.status(200).json(FormatResponseJson(200, "Create goods successful!", result));
+        }
+        return res.status(401).json(FormatResponseJson(401, "Create goods failed!", []));
+    } catch (e) {
+        console.log(e);
+        return res.status(500).json(FormatResponseJson(500, "Internal Server Error!", []));
+    }
+}
 
 export {
     GetAll,
-    //CreateDataSet
+    CreateDataSet
 }

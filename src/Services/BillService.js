@@ -36,7 +36,8 @@ class BillService {
             let [result, field] = await connection.execute("SELECT * FROM `hoadon` WHERE idban = ? AND trangthai = 0 ORDER BY ngaygiotao DESC LIMIT 1", [idTable]);
             if (result.length > 0) {
                 return result;
-            } return [];
+            }
+            return [];
         } catch (error) {
             console.log(error);
             return [];

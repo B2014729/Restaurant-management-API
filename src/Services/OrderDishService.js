@@ -22,7 +22,7 @@ class OrderDishService {
     async FindAll() {
         try {
             let result = [];
-            let [resultQuery, field] = await connection.execute("SELECT iddatmon FROM datmon ORDER BY thoidiemdat");
+            let [resultQuery, field] = await connection.execute("SELECT iddatmon FROM datmon ORDER BY thoidiemdat DESC");
             for (let i = 0; i < resultQuery.length; i++) {
                 let resultOrderDish = await new OrderDishService().FindOneById(resultQuery[i].iddatmon);
                 result[i] = resultOrderDish;
