@@ -1,5 +1,6 @@
-import e from "cors";
 import connection from "../Configs/ConnectDB.js";
+import bcrypt from 'bcrypt';
+
 class AccountService {
     async FindOneById(id) {
         try {
@@ -29,9 +30,14 @@ class AccountService {
 
     async Check(username, password) {
         try {
-            let [account, field] = await connection.execute("SELECT * FROM taikhoan WHERE tendangnhap = ? AND matkhau = ?", [username, password]);
+            let [account, field] = await connection.execute("SELECT * FROM taikhoan WHERE tendangnhap = ? ", [username]);
             if (account.length > 0) {
-                return account;
+                for (let index = 0; index < account.length; index++) {
+                    const element = account[index];
+                    // console.log(bcrypt.compareSync(password, element.matkhau));
+                    if (bcrypt.compareSync(password, element.matkhau))
+                        return [element];
+                }
             }
             return [];
         } catch (error) {
